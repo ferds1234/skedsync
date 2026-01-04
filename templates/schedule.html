@@ -747,7 +747,8 @@
         }
 
         // Calendar navigation
-        let calYear = 2025, calMonth = 6; // July 2025 (0-based)
+        let today = new Date();
+        let calYear = today.getFullYear(), calMonth = today.getMonth();
         function updateCalendar() {
             const title = document.getElementById('calendar-title');
             const date = new Date(calYear, calMonth, 1);
