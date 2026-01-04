@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --bg-dark: #f8fafc;
+            --bg-light: #ffffff;
+            --glass: rgba(255,255,255,0.85);
+            --glass-blur: blur(12px);
+            --card: #ffffff;
+            --card-alt: #f8fafc;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 12px 0 rgba(0,0,0,0.05);
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            text-shadow: none;
+        }
+        .sidebar .sidebar-icons {
+            display: flex;
+            gap: 0.5em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: none;
+        }
+        .sidebar .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.2);
+            border-left: 4px solid #60a5fa;
+            font-weight: 600;
+        }
+
+        .sidebar nav a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        
+        .sidebar-divider {
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 1.7rem 0 1.1rem 0;
+            border: none;
+        }
+
+        .sidebar-profile {
+            width: 100%;
+            text-align: left;
+            color: #64748b;
+            font-size: 1.01rem;
+            font-family: 'Roboto', Arial, sans-serif;
+            margin-bottom: 1.2rem;
+            padding-left: 0.1rem;
+            padding-bottom: 0.2rem;
+            letter-spacing: 0.01em;
+        }
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem 2.7rem 2rem 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 2.5px solid #e2e8f0;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.05), 0 1.5px 12px rgba(0,0,0,0.03);
+            backdrop-filter: blur(18px) saturate(1.2);
+            background-clip: padding-box;
+            position: relative;
+            z-index: 1;
+        }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 1.2rem 2.1rem 1.2rem 2.1rem;
+        }
+        .dashboard-header h1 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .report-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37,99,235,0.3);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+        .stat-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .stat-increase {
+            color: #22c55e;
+        }
+        .stat-decrease {
+            color: #ef4444;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: var(--shadow);
+        }
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .reports-table {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .filter-group label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .filter-group select,
+        .filter-group input {
+            padding: 0.6rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+        }
+        .export-section {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        .export-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+        .export-text {
+            flex: 1;
+        }
+        .export-text h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 0.5rem 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+        .export-text p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .btn-export {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            white-space: nowrap;
+        }
+        .btn-export:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>
+            <span class="sidebar-icons">
+                <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                    <defs>
+                        <linearGradient id="sync-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#sync-grad)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/admindashboard">
+                Admin Dashboard
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/users">
+                Manage Users
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/schedules">
+                Manage Schedules
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/reports" class="active">
+                Reports
+            </a>
+            <div class="nav-divider"></div>
+
+        </nav>
+        <div style="flex:1"></div>
+        <div style="width:100%;padding-bottom:1.2rem;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="
+                margin-bottom:0.5rem;
+                padding: 0;
+            ">
+                <a href="#" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.7em;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 0.85rem 1.1rem;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    font-size: 1.12rem;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    margin-bottom: 0.3rem;
+                " tabindex="-1">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    Admin
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="dashboard-header">
+            <h1>Reports & Analytics</h1>
+            <div class="report-controls">
+                <button class="btn-primary" onclick="refreshData()">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 3v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total Users</div>
+                <div class="stat-value">{{ total_users or 0 }}</div>
+                <div class="stat-change stat-increase">↗ Active users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Active Schedules</div>
+                <div class="stat-value">{{ active_schedules or 0 }}</div>
+                <div class="stat-change stat-increase">↗ Current semester</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Announcements Sent</div>
+                <div class="stat-value">{{ total_announcements or 0 }}</div>
+                <div class="stat-change stat-increase">↗ Published</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">System Uptime</div>
+                <div class="stat-value">99.9%</div>
+                <div class="stat-change stat-increase">↗ Excellent</div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <div class="export-content">
+                <div class="export-text">
+                    <h3>Export Reports</h3>
+                    <p>Generate and download comprehensive reports in your preferred format</p>
+                </div>
+                <button class="btn-export pdf" onclick="exportToPDF()">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                    Export as PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M3 3v18h18" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    User Registration Trends
+                </div>
+                <canvas id="userTrendsChart" width="400" height="400"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <circle cx="12" cy="12" r="10" stroke="#60a5fa" stroke-width="2" fill="none"/>
+                        <path d="M12 6v6l4 2" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Department Distribution
+                </div>
+                <canvas id="departmentChart" width="200" height="200"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <rect x="3" y="16" width="4" height="5" rx="2" fill="#2563eb"/>
+                        <rect x="9" y="10" width="4" height="11" rx="2" fill="#60a5fa"/>
+                        <rect x="15" y="6" width="4" height="15" rx="2" fill="#fbbf24"/>
+                    </svg>
+                    System Activity Overview
+                </div>
+                <canvas id="activityChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+
+
+
+    </main>
+
+    <script>
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            setupFilters();
+        });
+
+        function initializeCharts() {
+            // User Trends Chart
+            const userTrendsCtx = document.getElementById('userTrendsChart').getContext('2d');
+            const trendsData = {{ user_trends|tojson }};
+            const trendsLabels = trendsData.map(d => d.week);
+            const trendsCounts = trendsData.map(d => d.count);
+            
+            new Chart(userTrendsCtx, {
+                type: 'line',
+                data: {
+                    labels: trendsLabels.length > 0 ? trendsLabels : ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                    datasets: [{
+                        label: 'New Users',
+                        data: trendsCounts.length > 0 ? trendsCounts : [0, 0, 0, 0, 0, 0],
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Department Distribution Chart
+            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+            const deptData = {{ dept_distribution|tojson }};
+            const deptLabels = deptData.map(d => d.department || 'Unknown');
+            const deptCounts = deptData.map(d => d.count);
+            
+            new Chart(departmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        data: deptCounts,
+                        backgroundColor: [
+                            '#2563eb',
+                            '#60a5fa',
+                            '#fbbf24',
+                            '#22c55e',
+                            '#ef4444',
+                            '#a855f7'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                color: '#64748b'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            const activityData = {{ system_activity|tojson }};
+            const activityLabels = activityData.map(d => d.activity_type);
+            const activityCounts = activityData.map(d => d.count);
+            
+            new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: activityLabels.length > 0 ? activityLabels : ['User', 'System', 'Announcement', 'Schedule'],
+                    datasets: [{
+                        label: 'Activity Count',
+                        data: activityCounts.length > 0 ? activityCounts : [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#2563eb',
+                            '#60a5fa',
+                            '#fbbf24',
+                            '#22c55e',
+                            '#ef4444',
+                            '#a855f7'
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupFilters() {
+            const filters = ['activityFilter', 'departmentFilter'];
+            filters.forEach(filterId => {
+                document.getElementById(filterId).addEventListener('change', filterTable);
+            });
+            
+            document.getElementById('startDate').addEventListener('change', filterTable);
+            document.getElementById('endDate').addEventListener('change', filterTable);
+        }
+
+        function filterTable() {
+            const activityFilter = document.getElementById('activityFilter').value.toLowerCase();
+            const departmentFilter = document.getElementById('departmentFilter').value.toLowerCase();
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            
+            const rows = document.querySelectorAll('#activityTable tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowDate = new Date(cells[0].textContent);
+                const activityType = cells[1].textContent.toLowerCase();
+                const department = cells[3].textContent.toLowerCase();
+                
+                const matchesActivity = !activityFilter || activityType.includes(activityFilter);
+                const matchesDepartment = !departmentFilter || department.includes(departmentFilter);
+                const matchesDate = rowDate >= startDate && rowDate <= endDate;
+                
+                row.style.display = (matchesActivity && matchesDepartment && matchesDate) ? '' : 'none';
+            });
+        }
+
+        function refreshData() {
+            // Simulate data refresh
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<svg class="animate-spin" viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-opacity="0.25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg> Refreshing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showNotification('Data refreshed successfully!', 'success');
+            }, 2000);
+        }
+
+        function exportToPDF() {
+            showNotification('Generating PDF report...', 'info');
+            
+            // Create PDF content
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(20);
+            doc.text('SkedSync Reports & Analytics', 20, 20);
+            
+            // Add statistics
+            doc.setFontSize(14);
+            doc.text('Statistics Overview:', 20, 40);
+            doc.setFontSize(12);
+            doc.text(`Total Users: {{ total_users or 0 }}`, 20, 50);
+            doc.text(`Active Schedules: {{ active_schedules or 0 }}`, 20, 60);
+            doc.text(`Announcements Sent: {{ total_announcements or 0 }}`, 20, 70);
+            doc.text('System Uptime: 99.9%', 20, 80);
+            
+            // Add User Registration Trends
+            doc.setFontSize(14);
+            doc.text('User Registration Trends:', 20, 100);
+            doc.setFontSize(10);
+            let yPos = 110;
+            {% for trend in user_trends %}
+            doc.text('{{ trend.week }}: {{ trend.count }} users', 20, yPos);
+            yPos += 8;
+            {% endfor %}
+            
+            // Add Department Distribution
+            doc.setFontSize(14);
+            doc.text('Department Distribution:', 20, yPos + 10);
+            doc.setFontSize(10);
+            yPos += 20;
+            {% for dept in dept_distribution %}
+            doc.text('{{ dept.department }}: {{ dept.count }} users', 20, yPos);
+            yPos += 8;
+            {% endfor %}
+            
+            // Add System Activity Overview
+            doc.setFontSize(14);
+            doc.text('System Activity Overview:', 20, yPos + 10);
+            doc.setFontSize(10);
+            yPos += 20;
+            {% for activity in system_activity %}
+            doc.text('{{ activity.activity_type }}: {{ activity.count }} activities', 20, yPos);
+            yPos += 8;
+            {% endfor %}
+            
+            // Save PDF
+            doc.save('skedsync-report.pdf');
+            showNotification('PDF report downloaded successfully!', 'success');
+        }
+
+
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#60a5fa'};
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

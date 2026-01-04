@@ -1,0 +1,6 @@
+@echo off
+echo Starting Flask app in background...
+start /B python app.py
+timeout /t 5 /nobreak > nul
+echo Starting ngrok tunnel...
+ngrok.exe http 5000

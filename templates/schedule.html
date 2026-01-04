@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Schedule - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --bg-dark: #f8fafc;
+            --bg-light: #ffffff;
+            --glass: rgba(255,255,255,0.85);
+            --glass-blur: blur(12px);
+            --card: #ffffff;
+            --card-alt: #f8fafc;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 12px 0 rgba(0,0,0,0.05);
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            text-shadow: none;
+        }
+        .sidebar .sidebar-icons {
+            display: flex;
+            gap: 0.5em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: none;
+        }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.2);
+            border-left: 4px solid #60a5fa;
+            font-weight: 600;
+        }
+
+        .sidebar nav a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .sidebar .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem 2.7rem 2rem 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 2.5px solid #e2e8f0;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.05), 0 1.5px 12px rgba(0,0,0,0.03);
+            backdrop-filter: blur(18px) saturate(1.2);
+            background-clip: padding-box;
+            position: relative;
+            z-index: 1;
+        }
+        .hex-bg {
+            position: absolute;
+            z-index: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .hex-shape {
+            position: absolute;
+            opacity: 0.13;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .hex1 { left: 7vw; top: 8vh; width: 120px; }
+        .hex2 { right: 10vw; top: 18vh; width: 90px; }
+        .hex3 { left: 18vw; bottom: 12vh; width: 80px; }
+        .hex4 { right: 14vw; bottom: 8vh; width: 140px; }
+        .hex5 { left: 50vw; top: 50vh; width: 60px; }
+        .hex6 { left: 70vw; top: 70vh; width: 70px; }
+        .hex7 { left: 80vw; top: 10vh; width: 60px; }
+        .hex8 { left: 5vw; bottom: 20vh; width: 50px; }
+        .hex9 { right: 5vw; bottom: 25vh; width: 50px; }
+        .hex10 { left: 40vw; top: 80vh; width: 80px; }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 1.2rem 2.1rem 1.2rem 2.1rem;
+        }
+        .dashboard-header h1 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        @media (max-width: 900px) {
+            .main-content {
+                padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+            }
+            .sidebar {
+                width: 100vw;
+                min-height: unset;
+                flex-direction: row;
+                align-items: center;
+                padding: 1rem 0.5rem;
+                box-shadow: none;
+                background: var(--bg);
+                position: static;
+            }
+            .sidebar h2 {
+                font-size: 1.1rem;
+                margin-bottom: 0;
+                margin-right: 1.2rem;
+            }
+            .sidebar nav {
+                display: flex;
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+            .sidebar nav a {
+                padding: 0.5rem 0.7rem;
+                font-size: 1rem;
+                margin-bottom: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        @keyframes metallicShine {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 16px;
+            padding: 0.7em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3em;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #000; /* Added black outline */
+            box-shadow: 
+                -4px -4px 8px rgba(255,255,255,0.9),
+                4px 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-2px) scale(1.02);
+            border-color: #000; /* Maintain black border on hover */
+            box-shadow: 
+                -6px -6px 12px rgba(255,255,255,0.95),
+                6px 6px 12px rgba(0,0,0,0.08);
+        }
+
+        .calendar-day .day-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, #1e293b, #475569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .notification-day .day-number {
+            color: #ffffff;
+            background: #ffffff;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            box-shadow: 
+                -4px -4px 8px rgba(255,255,255,0.2),
+                4px 4px 8px rgba(37,99,235,0.3);
+            border: 1px solid #000; /* Keep black border for today */
+        }
+
+        .calendar-day.today .day-number {
+            background: white;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #3b82f6;
+            border-radius: 50%;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .notification-day {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-day::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                rgba(59,130,246,0.1) 0%,
+                rgba(59,130,246,0) 50%,
+                rgba(59,130,246,0.1) 100%
+            );
+            animation: shine 2s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        .event-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            display: flex;
+            border-radius: 16px 16px 0 0;
+            overflow: hidden;
+        }
+
+        .event-line {
+            flex: 1;
+            height: 100%;
+        }
+
+        .event-line.quiz { background: #ef4444; }
+        .event-line.exam { background: #fbbf24; }
+        .event-line.room { background: #3b82f6; }
+
+        #calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5em;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 24px;
+            padding: 2em;
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.05),
+                0 2px 8px rgba(0,0,0,0.03),
+                inset 0 2px 4px rgba(255,255,255,0.9);
+            border: 2px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .calendar-header {
+            color: #475569;
+            font-weight: 800;
+            text-align: center;
+            font-size: 1rem;
+            padding: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #f8fafc, #ffffff);
+            box-shadow: 
+                -2px -2px 4px rgba(255,255,255,0.9),
+                2px 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        #prevMonth, #nextMonth {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3b82f6;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 
+                -4px -4px 8px rgba(255,255,255,0.9),
+                4px 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        #prevMonth:hover, #nextMonth:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                -6px -6px 12px rgba(255,255,255,0.95),
+                6px 6px 12px rgba(0,0,0,0.08);
+            color: #2563eb;
+        }
+
+        #calendar-title {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 20px;
+            padding: 1rem 2rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            text-align: center;
+            box-shadow: 
+                -8px -8px 16px rgba(255,255,255,0.9),
+                8px 8px 16px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>
+            <span class="sidebar-icons">
+                <!-- Shield Icon (Security/Auth) from login page -->
+
+                <!-- Sync/Refresh Icon from login page -->
+                <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                    <defs>
+                        <linearGradient id="sync-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#sync-grad)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/dashboard">
+                Dashboard
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/schedule" class="active">
+                My Schedule
+            </a>
+            <div class="nav-divider  class=active"></div>
+            <a href="/notifications">
+                Notifications
+            </a>
+
+
+            <div class="nav-divider"></div>
+            <a href="/flashcards">
+                Flashcards
+            </a>
+            <div class="nav-divider"></div>
+        </nav>
+        <div style="flex:1"></div>
+        <div style="width:100%;padding-bottom:1.2rem;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="
+                margin-bottom:0.5rem;
+                padding: 0;
+            ">
+                <a href="#" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.7em;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 0.85rem 1.1rem;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    font-size: 1.12rem;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    margin-bottom: 0.3rem;
+                " tabindex="-1">
+                    <!-- User Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    {{ session.get('user', 'User') }}
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="hex-bg">
+            <svg class="hex-shape hex1" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#60a5fa"/>
+            </svg>
+            <svg class="hex-shape hex2" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#38bdf8"/>
+            </svg>
+            <svg class="hex-shape hex3" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#64748b"/>
+            </svg>
+            <svg class="hex-shape hex4" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#0ea5e9"/>
+            </svg>
+            <svg class="hex-shape hex5" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#3b82f6"/>
+            </svg>
+            <svg class="hex-shape hex6" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#1e293b"/>
+            </svg>
+            <svg class="hex-shape hex7" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#fbbf24"/>
+            </svg>
+            <svg class="hex-shape hex8" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#f472b6"/>
+            </svg>
+            <svg class="hex-shape hex9" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#a78bfa"/>
+            </svg>
+            <svg class="hex-shape hex10" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#34d399"/>
+            </svg>
+        </div>
+        <div class="dashboard-header">
+            <h1>
+                <span class="header-icons">
+                    <!-- Calendar Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em" style="margin-right:0.5em;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="#60a5fa" stroke-width="2" fill="none"/>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="#60a5fa" stroke-width="2"/>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="#60a5fa" stroke-width="2"/>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke="#60a5fa" stroke-width="2"/>
+                    </svg>
+                </span>
+                My Calendar
+            </h1>
+            <div style="display:flex;gap:1rem;align-items:center;">
+                <div style="background:#fff;border-radius:12px;padding:0.8rem 1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
+                    <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.2rem;">Current Semester</div>
+                    <div style="font-weight:700;color:#1e293b;">Fall 2025</div>
+                </div>
+                <div style="background:#fff;border-radius:12px;padding:0.8rem 1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
+                    <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.2rem;">Academic Year</div>
+                    <div style="font-weight:700;color:#1e293b;">2025-2026</div>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex;gap:2.5rem;align-items:flex-start;justify-content:center;flex-wrap:wrap;">
+            <div class="profile-summary-card" style="min-width:270px;max-width:320px;flex-shrink:0;min-height:520px;background:linear-gradient(135deg,#ffffff 60%,#f8fafc 100%);border-radius:20px;box-shadow:0 4px 32px rgba(0,0,0,0.08),0 1.5px 12px rgba(0,0,0,0.05);padding:2.1rem 1.5rem 1.5rem 1.5rem;border:1.5px solid #e2e8f0;display:flex;flex-direction:column;align-items:center;order:1;">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#2563eb 60%,#60a5fa 100%);display:flex;align-items:center;justify-content:center;font-size:2.3rem;color:#fff;font-weight:900;box-shadow:0 2px 12px #2563eb55;margin-bottom:1.1em;">
+                    {{ user.name[0]|upper if user and user.name else 'U' }}
+                </div>
+                <div style="font-family:'Montserrat',Arial,sans-serif;font-size:1.35rem;font-weight:800;color:#60a5fa;margin-bottom:0.7em;text-align:center;">
+                    {{ user.name if user and user.name else 'User' }}
+                </div>
+                <table style="width:100%;border-collapse:separate;border-spacing:0 0.7em;margin-bottom:0.7em;">
+                    <tr>
+                        <td style="color:#60a5fa;font-weight:700;text-align:right;padding:0.6em 1.2em 0.6em 0;">Student ID:</td>
+                        <td style="color:#1e293b;font-weight:600;text-align:left;padding:0.6em 0 0.6em 0.5em;">{{ user.student_id if user else '' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#60a5fa;font-weight:700;text-align:right;padding:0.6em 1.2em 0.6em 0;">Email:</td>
+                        <td style="color:#1e293b;font-weight:600;text-align:left;padding:0.6em 0 0.6em 0.5em;">{{ user.email if user else '' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#60a5fa;font-weight:700;text-align:right;padding:0.6em 1.2em 0.6em 0;">Section:</td>
+                        <td style="color:#1e293b;font-weight:600;text-align:left;padding:0.6em 0 0.6em 0.5em;">{{ user.section if user else '' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#60a5fa;font-weight:700;text-align:right;padding:0.6em 1.2em 0.6em 0;">Department:</td>
+                        <td style="color:#1e293b;font-weight:600;text-align:left;padding:0.6em 0 0.6em 0.5em;">{{ user.department if user else '' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#60a5fa;font-weight:700;text-align:right;padding:0.6em 1.2em 0.6em 0;">Year Level:</td>
+                        <td style="color:#1e293b;font-weight:600;text-align:left;padding:0.6em 0 0.6em 0.5em;">{{ user.year_level if user else '' }}</td>
+                    </tr>
+                </table>
+                <a href="/profile" style="margin-top:0.7em;background:linear-gradient(90deg,#2563eb 0%,#60a5fa 100%);color:#fff;padding:0.6em 1.3em;border-radius:10px;font-size:1.05em;font-weight:700;text-decoration:none;transition:background 0.18s;box-shadow:0 2px 12px #2563eb33;">View Full Profile</a>
+            </div>
+            <div id="calendar-container" style="width:900px;max-width:900px;min-width:900px;flex-shrink:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;width:100%;">
+                    <button id="prevMonth" style="background:linear-gradient(145deg, #ffffff, #f8fafc);border:1px solid rgba(226, 232, 240, 0.8);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:#3b82f6;font-size:1.5rem;cursor:pointer;box-shadow:-4px -4px 8px rgba(255,255,255,0.9),4px 4px 8px rgba(0,0,0,0.05);transition:all 0.3s ease;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3b82f6'">&#8592;</button>
+                    <div id="calendar-title" style="background:linear-gradient(145deg, #ffffff, #f8fafc);border:2px solid rgba(226, 232, 240, 0.8);border-radius:20px;padding:1rem 2rem;font-size:2.5rem;font-weight:800;color:#1e293b;text-align:center;box-shadow:-8px -8px 16px rgba(255,255,255,0.9),8px 8px 16px rgba(0,0,0,0.05);">July 2025</div>
+                    <button id="nextMonth" style="background:linear-gradient(145deg, #ffffff, #f8fafc);border:1px solid rgba(226, 232, 240, 0.8);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:#3b82f6;font-size:1.5rem;cursor:pointer;box-shadow:-4px -4px 8px rgba(255,255,255,0.9),4px 4px 8px rgba(0,0,0,0.05);transition:all 0.3s ease;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3b82f6'">&#8594;</button>
+                    <div style="background:#fff;border-radius:12px;padding:1rem;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
+                        <div style="font-size:0.9rem;font-weight:700;color:#1e293b;margin-bottom:0.5rem;">Color Guide</div>
+                        <div style="display:flex;flex-direction:column;gap:0.3rem;">
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><div style="width:20px;height:3px;background:#ef4444;"></div><span style="font-size:0.8rem;color:#64748b;">Quiz</span></div>
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><div style="width:20px;height:3px;background:#fbbf24;"></div><span style="font-size:0.8rem;color:#64748b;">Exam</span></div>
+                            <div style="display:flex;align-items:center;gap:0.5rem;"><div style="width:20px;height:3px;background:#3b82f6;"></div><span style="font-size:0.8rem;color:#64748b;">Room</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.5em;background:linear-gradient(145deg,#ffffff,#f8fafc);border-radius:24px;padding:2em;box-shadow:0 8px 32px rgba(0,0,0,0.05),0 2px 8px rgba(0,0,0,0.03),inset 0 2px 4px rgba(255,255,255,0.9);border:2px solid rgba(226,232,240,0.8);">
+                    <!-- Calendar headers -->
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Sun</div>
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Mon</div>
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Tue</div>
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Wed</div>
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Thu</div>
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Fri</div>
+                    <div style="color:#1e293b;font-weight:900;text-align:center;font-size:1.13em;letter-spacing:0.5px;">Sat</div>
+                    <!-- Calendar days will be rendered by JS -->
+                </div>
+            </div>
+        </div>
+        <script>
+        // User credentials for filtering
+        const userCredentials = {
+            department: '{{ user.department if user else "" }}',
+            year_level: '{{ user.year_level if user else "" }}',
+            section: '{{ user.section if user else "" }}'
+        };
+        
+        // Notifications from database
+        let notifications = {};
+        
+        // Fetch notifications from server
+        async function loadNotifications() {
+            try {
+                console.log('Loading notifications for user:', userCredentials);
+                const response = await fetch('/api/notifications');
+                const data = await response.json();
+                console.log('Received notifications:', data);
+                notifications = {};
+                
+                data.forEach(notification => {
+                    console.log('Processing notification:', notification);
+                    // Use notification date or default to today if NULL
+                    const dateKey = notification.date || new Date().toISOString().split('T')[0];
+                    if (!notifications[dateKey]) {
+                        notifications[dateKey] = [];
+                    }
+                    notifications[dateKey].push({
+                        id: notification.id,
+                        type: notification.type,
+                        title: notification.title,
+                        description: notification.description,
+                        subject: notification.subject || 'N/A',
+                        time: notification.time || 'N/A',
+                        room: notification.room || 'N/A',
+                        duration: notification.duration || 'N/A',
+                        instructions: notification.instructions || 'No additional instructions'
+                    });
+                });
+                console.log('Final notifications object:', notifications);
+                updateCalendar();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        function renderCalendar(year, month) {
+            const grid = document.getElementById('calendar-grid');
+            
+            // Clear existing calendar days (keep headers)
+            const headers = Array.from(grid.children).slice(0, 7);
+            grid.innerHTML = '';
+            headers.forEach(header => grid.appendChild(header));
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const today = new Date();
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            // Fill empty days at the beginning
+            for (let i = 0; i < startDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-day empty';
+                emptyCell.style.cssText = 'background:transparent;border:none;box-shadow:none;';
+                grid.appendChild(emptyCell);
+            }
+
+            // Create calendar days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day';
+                
+                // Create day number element
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = d;
+                cell.appendChild(dayNumber);
+                
+                // Check if it's today
+                if (year === today.getFullYear() && 
+                    month === today.getMonth() && 
+                    d === today.getDate()) {
+                    cell.classList.add('today');
+                }
+
+                // Check for notifications
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                if (notifications[dateKey]) {
+                    cell.classList.add('notification-day');
+                    
+                    // Create event indicators
+                    const eventTypes = new Set(notifications[dateKey].map(n => n.type));
+                    const indicatorDiv = document.createElement('div');
+                    indicatorDiv.className = 'event-indicator';
+                    
+                    eventTypes.forEach(type => {
+                        const line = document.createElement('div');
+                        line.className = `event-line ${type}`;
+                        indicatorDiv.appendChild(line);
+                    });
+                    
+                    // Add event count indicator
+                    if (notifications[dateKey].length > 1) {
+                        const countBadge = document.createElement('div');
+                        countBadge.style.cssText = 'position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,0.2);';
+                        countBadge.textContent = notifications[dateKey].length;
+                        cell.appendChild(countBadge);
+                    }
+                    
+                    cell.appendChild(indicatorDiv);
+                    
+                    // Add click handler
+                    cell.onclick = () => showDayNotifications(dateKey, notifications[dateKey]);
+                }
+
+                grid.appendChild(cell);
+            }
+            
+            // Fill remaining empty cells to complete the grid (6 rows total)
+            const totalCells = startDay + daysInMonth;
+            const remainingCells = 42 - totalCells; // 6 rows × 7 days = 42 total cells
+            for (let i = 0; i < remainingCells; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-day empty';
+                emptyCell.style.cssText = 'background:transparent;border:none;box-shadow:none;';
+                grid.appendChild(emptyCell);
+            }
+        }
+
+        // Calendar navigation
+        let calYear = 2025, calMonth = 6; // July 2025 (0-based)
+        function updateCalendar() {
+            const title = document.getElementById('calendar-title');
+            const date = new Date(calYear, calMonth, 1);
+            title.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            renderCalendar(calYear, calMonth);
+        }
+        document.getElementById('prevMonth').onclick = function() {
+            calMonth--;
+            if (calMonth < 0) { calMonth = 11; calYear--; }
+            updateCalendar();
+        };
+        document.getElementById('nextMonth').onclick = function() {
+            calMonth++;
+            if (calMonth > 11) { calMonth = 0; calYear++; }
+            updateCalendar();
+        };
+        
+        function showDayNotifications(date, dayNotifications) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center';
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'background:#f8fafc;border-radius:16px;padding:2rem;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,0.15)';
+            
+            const header = document.createElement('div');
+            header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem';
+            
+            const title = document.createElement('h3');
+            title.style.cssText = 'margin:0;color:#1e293b';
+            title.textContent = `Notifications for ${new Date(date).toLocaleDateString()}`;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.style.cssText = 'background:none;border:none;font-size:1.5rem;cursor:pointer;color:#64748b';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => modal.remove();
+            
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+            
+            content.appendChild(header);
+            
+            dayNotifications.forEach(notification => {
+                const notifCard = document.createElement('div');
+                notifCard.style.cssText = 'background:#f8fafc;border-radius:12px;padding:1.5rem;margin-bottom:1rem;border:1px solid #e2e8f0';
+                
+                const typeColor = notification.type === 'quiz' ? '#ef4444' : notification.type === 'exam' ? '#fbbf24' : '#3b82f6';
+                
+                notifCard.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+                        <div style="width:20px;height:3px;background:${typeColor}"></div>
+                        <h4 style="margin:0;color:#1e293b;text-transform:capitalize">${notification.type}</h4>
+                    </div>
+                    <h5 style="margin:0 0 0.5rem 0;color:#1e293b;font-size:1.1rem">${notification.title}</h5>
+                    <p style="margin:0 0 1rem 0;color:#64748b;line-height:1.5">${notification.description}</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:0.9rem">
+                        <div><strong>Subject:</strong> ${notification.subject}</div>
+                        <div><strong>Room:</strong> ${notification.room}</div>
+                        <div><strong>Time:</strong> ${notification.time}</div>
+                        <div><strong>Duration:</strong> ${notification.duration} min</div>
+                    </div>
+                    ${notification.instructions ? `<div style="margin-top:1rem;padding:1rem;background:#fff;border-radius:8px"><strong>Instructions:</strong><br>${notification.instructions}</div>` : ''}
+                `;
+                
+                content.appendChild(notifCard);
+            });
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+        
+        // Initialize
+        loadNotifications();
+        updateCalendar();
+        </script>
+    </main>
+</body>
+</html>

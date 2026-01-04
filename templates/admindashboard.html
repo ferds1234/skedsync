@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --bg-dark: #f8fafc;
+            --bg-light: #ffffff;
+            --glass: rgba(255,255,255,0.85);
+            --glass-blur: blur(12px);
+            --card: #ffffff;
+            --card-alt: #f8fafc;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 12px 0 rgba(0,0,0,0.05);
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            text-shadow: none;
+        }
+        .sidebar .sidebar-icons {
+            display: flex;
+            gap: 0.5em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: none;
+        }
+        .sidebar .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.2);
+            border-left: 4px solid #60a5fa;
+            font-weight: 600;
+        }
+
+        .sidebar nav a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        
+        .sidebar-divider {
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 1.7rem 0 1.1rem 0;
+            border: none;
+        }
+
+        .sidebar-profile {
+            width: 100%;
+            text-align: left;
+            color: #a5b4fc;
+            font-size: 1.01rem;
+            font-family: 'Roboto', Arial, sans-serif;
+            margin-bottom: 1.2rem;
+            padding-left: 0.1rem;
+            padding-bottom: 0.2rem;
+            letter-spacing: 0.01em;
+        }
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem 2.7rem 2rem 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 2.5px solid #e2e8f0;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.05), 0 1.5px 12px rgba(0,0,0,0.03);
+            backdrop-filter: blur(18px) saturate(1.2);
+            background-clip: padding-box;
+            position: relative;
+            z-index: 1;
+        }
+        .hex-bg {
+            position: absolute;
+            z-index: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .hex-shape {
+            position: absolute;
+            opacity: 0.13;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .hex1 { left: 7vw; top: 8vh; width: 120px; }
+        .hex2 { right: 10vw; top: 18vh; width: 90px; }
+        .hex3 { left: 18vw; bottom: 12vh; width: 80px; }
+        .hex4 { right: 14vw; bottom: 8vh; width: 140px; }
+        .hex5 { left: 50vw; top: 50vh; width: 60px; }
+        .hex6 { left: 70vw; top: 70vh; width: 70px; }
+        .hex7 { left: 80vw; top: 10vh; width: 60px; }
+        .hex8 { left: 5vw; bottom: 20vh; width: 50px; }
+        .hex9 { right: 5vw; bottom: 25vh; width: 50px; }
+        .hex10 { left: 40vw; top: 80vh; width: 80px; }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 1.2rem 2.1rem 1.2rem 2.1rem;
+        }
+        .dashboard-header h1 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .widgets-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2.7rem;
+            flex-wrap: wrap;
+        }
+        .widget {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 20px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08), 0 1.5px 12px rgba(0,0,0,0.05);
+            padding: 2.1rem 2.5rem;
+            min-width: 220px;
+            flex: 1 1 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            border: 2.5px solid #e2e8f0;
+            transition: 
+                box-shadow 0.18s, 
+                border 0.18s, 
+                transform 0.18s,
+                background 0.18s;
+            background-image: linear-gradient(120deg, #ffffff 60%, #f1f5f9 100%);
+        }
+        .widget::before {
+            content: "";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 7px;
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 2;
+            opacity: 0.92;
+        }
+        .widget:hover::before {
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+            opacity: 1;
+        }
+        .widget:hover {
+            box-shadow: 0 12px 48px rgba(96,165,250,0.2), 0 4px 24px rgba(37,99,235,0.15);
+            border: 2.5px solid #60a5fa;
+            background: linear-gradient(120deg, #f8fafc 40%, rgba(96,165,250,0.1) 100%);
+            transform: translateY(-6px) scale(1.025);
+        }
+        .widget .widget-icon {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            width: 2.2em;
+            height: 2.2em;
+            opacity: 0.13;
+            filter: drop-shadow(0 2px 8px #60a5fa44);
+        }
+        .widget-title {
+            font-size: 1.18rem;
+            color: #60a5fa;
+            font-weight: 800;
+            margin-bottom: 0.7rem;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px #23272b44;
+        }
+        .widget-value {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+            text-shadow: none;
+            letter-spacing: 1px;
+        }
+        .widget-desc {
+            font-size: 1.07rem;
+            color: #64748b;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+        }
+        @media (max-width: 700px) {
+            .sidebar {
+                position: static;
+                width: 100vw;
+                min-height: unset;
+                flex-direction: row;
+                align-items: center;
+                padding: 1rem 0.5rem;
+                box-shadow: none;
+                background: var(--bg);
+            }
+            .sidebar h2 {
+                font-size: 1.1rem;
+                margin-bottom: 0;
+                margin-right: 1.2rem;
+            }
+            .sidebar nav {
+                display: flex;
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+            .sidebar nav a {
+                padding: 0.5rem 0.7rem;
+                font-size: 1rem;
+                margin-bottom: 0;
+            }
+            .sidebar .logout-btn {
+                margin-top: 0;
+                margin-left: 1rem;
+                padding: 0.5rem 0.9rem;
+                font-size: 0.98rem;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>
+            <span class="sidebar-icons">
+                <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                    <defs>
+                        <linearGradient id="sync-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#sync-grad)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/admindashboard" class="active">
+                Admin Dashboard
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/users">
+                Manage Users
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/schedules">
+                Manage Schedules
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/reports">
+                Reports
+            </a>
+
+            <div class="nav-divider"></div>
+        </nav>
+        <div style="flex:1"></div>
+        <div style="width:100%;padding-bottom:1.2rem;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="
+                margin-bottom:0.5rem;
+                padding: 0;
+            ">
+                <a href="#" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.7em;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 0.85rem 1.1rem;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    font-size: 1.12rem;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    margin-bottom: 0.3rem;
+                " tabindex="-1">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    Admin
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="hex-bg">
+            <svg class="hex-shape hex1" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#60a5fa"/>
+            </svg>
+            <svg class="hex-shape hex2" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#38bdf8"/>
+            </svg>
+            <svg class="hex-shape hex3" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#64748b"/>
+            </svg>
+            <svg class="hex-shape hex4" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#0ea5e9"/>
+            </svg>
+            <svg class="hex-shape hex5" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#3b82f6"/>
+            </svg>
+            <svg class="hex-shape hex6" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#1e293b"/>
+            </svg>
+            <svg class="hex-shape hex7" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#fbbf24"/>
+            </svg>
+            <svg class="hex-shape hex8" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#f472b6"/>
+            </svg>
+            <svg class="hex-shape hex9" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#a78bfa"/>
+            </svg>
+            <svg class="hex-shape hex10" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#34d399"/>
+            </svg>
+        </div>
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+        </div>
+        <div class="widgets-row">
+            <div class="widget">
+                <span class="widget-icon">
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="users-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#60a5fa"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="18" cy="16" r="8" fill="url(#users-grad)" stroke="#60a5fa" stroke-width="2"/>
+                        <circle cx="30" cy="20" r="6" fill="url(#users-grad)" stroke="#60a5fa" stroke-width="2"/>
+                        <path d="M4 40v-4c0-6 4-10 10-10h8c6 0 10 4 10 10v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M24 40v-2c0-4 2-6 6-6h4c4 0 6 2 6 6v2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <div class="widget-title">Total Users</div>
+                <div class="widget-value">{{ total_users or 0 }}</div>
+                <div class="widget-desc">Active students and staff</div>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="schedule-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#60a5fa"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="8" y="12" width="32" height="24" rx="4" fill="url(#schedule-grad)" stroke="#60a5fa" stroke-width="2"/>
+                        <path d="M16 8v8M32 8v8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M8 20h32" stroke="#fff" stroke-width="2"/>
+                    </svg>
+                </span>
+                <div class="widget-title">Active Schedules</div>
+                <div class="widget-value">{{ active_schedules or 0 }}</div>
+                <div class="widget-desc">Current semester schedules</div>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="alerts-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#fbbf24"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M24 6L8 14v10c0 11 8 17 16 18 8-1 16-7 16-18V14L24 6z" fill="url(#alerts-grad)" stroke="#fbbf24" stroke-width="2"/>
+                        <path d="M24 18v6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="24" cy="30" r="1" fill="#fff"/>
+                    </svg>
+                </span>
+                <div class="widget-title">System Alerts</div>
+                <div class="widget-value">{{ total_announcements or 0 }}</div>
+                <div class="widget-desc">Published announcements</div>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="activity-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#34d399"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="24" cy="24" r="18" fill="url(#activity-grad)" stroke="#34d399" stroke-width="2"/>
+                        <path d="M16 24l6 6 10-10" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <div class="widget-title">System Status</div>
+                <div class="widget-value">Online</div>
+                <div class="widget-desc">All services operational</div>
+            </div>
+        </div>
+        
+        <div class="quick-actions" style="display: flex; gap: 1.5rem; margin-bottom: 2.7rem; flex-wrap: wrap;">
+            <a href="/users" class="quick-action" style="background: linear-gradient(135deg, #ffffff 60%, #ffffff 100%); color: var(--accent); border-radius: 14px; padding: 1.1rem 1.7rem; font-size: 1.09rem; font-weight: 600; display: flex; align-items: center; gap: 0.7em; cursor: pointer; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.05); transition: background 0.18s, color 0.18s; text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M12 5v14M5 12h14" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/></svg>
+                Add New User
+            </a>
+            <a href="/schedules" class="quick-action" style="background: linear-gradient(135deg, #ffffff 60%, #ffffff 100%); color: var(--accent); border-radius: 14px; padding: 1.1rem 1.7rem; font-size: 1.09rem; font-weight: 600; display: flex; align-items: center; gap: 0.7em; cursor: pointer; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.05); transition: background 0.18s, color 0.18s; text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><rect x="3" y="5" width="18" height="16" rx="3" fill="#60a5fa"/><rect x="7" y="2" width="2" height="4" rx="1" fill="#60a5fa"/><rect x="15" y="2" width="2" height="4" rx="1" fill="#60a5fa"/></svg>
+                Create Schedule
+            </a>
+
+            <button class="quick-action" onclick="openModal('notificationModal')" style="background: linear-gradient(135deg, #ffffff 60%, #ffffff 100%); color: var(--accent); border-radius: 14px; padding: 1.1rem 1.7rem; font-size: 1.09rem; font-weight: 600; display: flex; align-items: center; gap: 0.7em; cursor: pointer; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.05); transition: background 0.18s, color 0.18s;">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z" fill="#60a5fa"/></svg>
+                Send Notification
+            </button>
+        </div>
+
+        <div class="all-cards-row" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-start; margin-bottom: 2.7rem; background: linear-gradient(135deg, #f8fafc 60%, #e2e8f0 100%); padding: 1.5rem; border-radius: 20px; box-shadow: 0 4px 32px rgba(0,0,0,0.05); border: 1.5px solid #e2e8f0;">
+            {% for announcement in announcements %}
+            {% if announcement.type == 'quiz' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <path d="M9 12l2 2 4-4" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="10" fill="#ef4444" fill-opacity="0.1" stroke="#ef4444" stroke-width="2"/>
+                    </svg>
+                    Quiz
+                </div>
+                <div style="color: #ef4444; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px; border-left: 2px solid #ef4444;">
+                    <div style="color: #ef4444; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            {% elif announcement.type == 'exam' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#fbbf24" fill-opacity="0.2" stroke="#fbbf24" stroke-width="2"/>
+                        <polyline points="14,2 14,8 20,8" stroke="#fbbf24" stroke-width="2" fill="none"/>
+                    </svg>
+                    Exam
+                </div>
+                <div style="color: #fbbf24; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(251, 191, 36, 0.1); border-radius: 6px; border-left: 2px solid #fbbf24;">
+                    <div style="color: #fbbf24; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            {% elif announcement.type == 'room' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="#3b82f6" fill-opacity="0.2" stroke="#3b82f6" stroke-width="2"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="#3b82f6" stroke-width="2"/>
+                    </svg>
+                    Room
+                </div>
+                <div style="color: #3b82f6; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(59, 130, 246, 0.1); border-radius: 6px; border-left: 2px solid #3b82f6;">
+                    <div style="color: #3b82f6; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            {% elif announcement.type == 'assignment' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <path d="M9 11H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2M9 11V9a2 2 0 1 1 4 0v2M9 11h6" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2"/>
+                    </svg>
+                    Assignment
+                </div>
+                <div style="color: #10b981; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px; border-left: 2px solid #10b981;">
+                    <div style="color: #10b981; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            {% elif announcement.type == 'event' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="#8b5cf6" fill-opacity="0.2" stroke="#8b5cf6" stroke-width="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="#8b5cf6" stroke-width="2"/>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="#8b5cf6" stroke-width="2"/>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke="#8b5cf6" stroke-width="2"/>
+                    </svg>
+                    Event
+                </div>
+                <div style="color: #8b5cf6; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(139, 92, 246, 0.1); border-radius: 6px; border-left: 2px solid #8b5cf6;">
+                    <div style="color: #8b5cf6; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            {% elif announcement.type == 'maintenance' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="#f97316" fill-opacity="0.2" stroke="#f97316" stroke-width="2"/>
+                    </svg>
+                    Maintenance
+                </div>
+                <div style="color: #f97316; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(249, 115, 22, 0.1); border-radius: 6px; border-left: 2px solid #f97316;">
+                    <div style="color: #f97316; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            {% elif announcement.type == 'alert' %}
+            <div class="info-card" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); padding: 1rem; flex: 0 0 200px; min-height: 140px; border: 1.5px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease;">
+                <div class="card-title" style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4em;">
+                    <svg viewBox="0 0 24 24" fill="none" style="width: 1em; height: 1em;">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="#dc2626" fill-opacity="0.2" stroke="#dc2626" stroke-width="2"/>
+                        <line x1="12" y1="9" x2="12" y2="13" stroke="#dc2626" stroke-width="2"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17" stroke="#dc2626" stroke-width="2"/>
+                    </svg>
+                    Alert
+                </div>
+                <div style="color: #dc2626; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">{{ announcement.title }}</div>
+                <div style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.6rem;">{{ announcement.description.split(' - ')[0] if ' - ' in announcement.description else announcement.description }}</div>
+                <div style="padding: 0.4rem; background: rgba(220, 38, 38, 0.1); border-radius: 6px; border-left: 2px solid #dc2626;">
+                    <div style="color: #dc2626; font-size: 0.7rem; font-weight: 600;">{{ announcement.description.split(' - ')[1] if ' - ' in announcement.description else 'TBA' }}</div>
+                </div>
+            </div>
+            
+            {% endif %}
+            
+            {% endfor %}
+            
+                </div>
+            </div>
+            
+
+        </div>
+            
+
+
+        <div class="recent-activity" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); border-radius: 20px; box-shadow: 0 4px 32px rgba(0,0,0,0.08), 0 1.5px 12px rgba(0,0,0,0.05); padding: 1.5rem; margin-top: 2rem; color: var(--text); border: 1.5px solid #e2e8f0;">
+            <h3 style="font-size: 1.13rem; color: #1e293b; margin-bottom: 1rem; font-weight: 700; letter-spacing: 0.1px;">Recent Admin Activity</h3>
+            <ul class="activity-list" style="list-style: none; padding: 0; margin: 0;">
+                {% if recent_activities %}
+                    {% for activity in recent_activities %}
+                    <li style="padding: 0.7em 0; {% if not loop.last %}border-bottom: 1px solid #e2e8f0;{% endif %} font-size: 1.01rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.7em;">
+                        {% if activity.action_type == 'user' %}
+                            <svg class="activity-icon" viewBox="0 0 24 24" fill="none" style="width: 1.2em; height: 1.2em; opacity: 0.7;"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                        {% elif activity.action_type == 'announcement' %}
+                            <svg class="activity-icon" viewBox="0 0 24 24" fill="none" style="width: 1.2em; height: 1.2em; opacity: 0.7;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#fbbf24"/></svg>
+                        {% else %}
+                            <svg class="activity-icon" viewBox="0 0 24 24" fill="none" style="width: 1.2em; height: 1.2em; opacity: 0.7;"><path d="M12 5v14M5 12h14" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/></svg>
+                        {% endif %}
+                        {{ activity.description }}
+                        <span style="margin-left: auto; font-size: 0.8em; color: #94a3b8;">{{ activity.timestamp.strftime('%m/%d %H:%M') }}</span>
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    <li style="padding: 0.7em 0; font-size: 1.01rem; color: var(--text-muted); text-align: center; opacity: 0.6;">
+                        No recent activities
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </main>
+    
+    <!-- Modals -->
+    <div id="quizModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); margin: 5% auto; padding: 2rem; width: 80%; max-width: 600px; border-radius: 20px; border: 1.5px solid #e2e8f0;">
+            <span class="close" onclick="closeModal('quizModal')" style="color: #64748b; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="color: #ef4444; margin-bottom: 1rem;">Quiz Announcements</h2>
+            <div style="color: #1e293b;">
+                <div style="padding: 1rem; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
+                    <h3 style="color: #ef4444; margin-bottom: 0.5rem;">Math 101 Quiz</h3>
+                    <p style="margin-bottom: 0.5rem;">Tomorrow at 10:00 AM</p>
+                    <p style="color: #64748b;">Room 101 - Bring calculator and ID</p>
+                </div>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
+                    <h3 style="color: #ef4444; margin-bottom: 0.5rem;">Chemistry 102 Quiz</h3>
+                    <p style="margin-bottom: 0.5rem;">Thursday at 2:00 PM</p>
+                    <p style="color: #b6c2d6;">Lab 3 - Periodic table allowed</p>
+                </div>
+                <div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
+                    <h3 style="color: #ef4444; margin-bottom: 0.5rem;">English 103 Quiz</h3>
+                    <p style="margin-bottom: 0.5rem;">Next Monday at 9:00 AM</p>
+                    <p style="color: #b6c2d6;">Room 205 - Essay format</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="examModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); margin: 5% auto; padding: 2rem; width: 80%; max-width: 600px; border-radius: 20px; border: 1.5px solid #e2e8f0;">
+            <span class="close" onclick="closeModal('examModal')" style="color: #64748b; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="color: #fbbf24; margin-bottom: 1rem;">Exam Announcements</h2>
+            <div style="color: #1e293b;">
+                <div style="padding: 1rem; margin-bottom: 1rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 3px solid #fbbf24;">
+                    <h3 style="color: #fbbf24; margin-bottom: 0.5rem;">Physics Final Exam</h3>
+                    <p style="margin-bottom: 0.5rem;">Friday at 2:00 PM</p>
+                    <p style="color: #64748b;">Hall A - 2 hours duration, bring calculator</p>
+                </div>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 3px solid #fbbf24;">
+                    <h3 style="color: #fbbf24; margin-bottom: 0.5rem;">Math 101 Midterm</h3>
+                    <p style="margin-bottom: 0.5rem;">Next Tuesday at 10:00 AM</p>
+                    <p style="color: #64748b;">Hall B - 3 hours duration, no calculator</p>
+                </div>
+                <div style="padding: 1rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 3px solid #fbbf24;">
+                    <h3 style="color: #fbbf24; margin-bottom: 0.5rem;">Biology 201 Final</h3>
+                    <p style="margin-bottom: 0.5rem;">Next Friday at 1:00 PM</p>
+                    <p style="color: #64748b;">Lab 1 - 2.5 hours, microscope provided</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="roomModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); margin: 5% auto; padding: 2rem; width: 80%; max-width: 600px; border-radius: 20px; border: 1.5px solid #e2e8f0;">
+            <span class="close" onclick="closeModal('roomModal')" style="color: #64748b; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="color: #3b82f6; margin-bottom: 1rem;">Room Announcements</h2>
+            <div style="color: #1e293b;">
+                <div style="padding: 1rem; margin-bottom: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                    <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">Room 205 Unavailable</h3>
+                    <p style="margin-bottom: 0.5rem;">Today - Maintenance</p>
+                    <p style="color: #64748b;">Available again at 3:00 PM</p>
+                </div>
+                <div style="padding: 1rem; margin-bottom: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                    <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">Lab 3 Equipment Update</h3>
+                    <p style="margin-bottom: 0.5rem;">Tomorrow - New microscopes</p>
+                    <p style="color: #64748b;">Training session at 8:00 AM</p>
+                </div>
+                <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                    <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">Hall A Air Conditioning</h3>
+                    <p style="margin-bottom: 0.5rem;">This week - Repair work</p>
+                    <p style="color: #64748b;">Temporary fans provided</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificationModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%); margin: 5% auto; padding: 2rem; width: 80%; max-width: 500px; border-radius: 20px; border: 1.5px solid #e2e8f0;">
+            <span class="close" onclick="closeModal('notificationModal')" style="color: #64748b; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="color: #60a5fa; margin-bottom: 1.5rem;">Send Notification</h2>
+            <form style="color: #1e293b;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #64748b;">Notification Type:</label>
+                    <select style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #1e293b;">
+                        <option value="general">General Announcement</option>
+                        <option value="quiz">Quiz Announcement</option>
+                        <option value="exam">Exam Announcement</option>
+                        <option value="room">Room Announcement</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #64748b;">Title:</label>
+                    <input type="text" placeholder="Enter notification title" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #1e293b;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #64748b;">Message:</label>
+                    <textarea rows="4" placeholder="Enter notification message" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #1e293b; resize: vertical;"></textarea>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #64748b;">Send to:</label>
+                    <select style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #1e293b;">
+                        <option value="all">All Users</option>
+                        <option value="students">Students Only</option>
+                        <option value="staff">Staff Only</option>
+                        <option value="department">Specific Department</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeModal('notificationModal')" style="padding: 0.8rem 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; background: transparent; color: #64748b; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 0.8rem 1.5rem; border-radius: 8px; border: none; background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%); color: #fff; cursor: pointer; font-weight: 600;">Send Notification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+        
+        // Add hover effects to announcement cards
+        document.querySelectorAll('.info-card').forEach(card => {
+            if (card.onclick) {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 8px 40px rgba(0,0,0,0.15)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 32px rgba(0,0,0,0.08)';
+                });
+            }
+        });
+        
+        // Add hover effects to quick actions
+        document.querySelectorAll('.quick-action').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.background = 'linear-gradient(90deg, #2563eb 0%, #60a5fa 100%)';
+                this.style.color = '#fff';
+                this.style.border = '1.5px solid #60a5fa';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.background = 'linear-gradient(135deg, #ffffff 60%, #f8fafc 100%)';
+                this.style.color = 'var(--accent)';
+
+            });
+        });
+        
+        // Statistics Bar Chart
+        new Chart(document.getElementById('statsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Logins', 'Registrations', 'Sessions', 'Uptime %'],
+                datasets: [{
+                    data: [156, 12, 89, 99.9],
+                    backgroundColor: [
+                        '#2563eb',
+                        '#34d399',
+                        '#fbbf24',
+                        '#22c55e'
+                    ],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#64748b', font: { size: 12 } },
+                        grid: { color: '#e2e8f0' }
+                    },
+                    x: {
+                        ticks: { color: '#64748b', font: { size: 12 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

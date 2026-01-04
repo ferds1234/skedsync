@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --bg-dark: #f8fafc;
+            --bg-light: #ffffff;
+            --glass: rgba(255,255,255,0.85);
+            --glass-blur: blur(12px);
+            --card: #ffffff;
+            --card-alt: #f8fafc;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 12px 0 rgba(0,0,0,0.05);
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            text-shadow: none;
+        }
+        .sidebar .sidebar-icons {
+            display: flex;
+            gap: 0.5em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: none;
+        }
+        .sidebar .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.2);
+            border-left: 4px solid #60a5fa;
+            font-weight: 600;
+        }
+        .sidebar nav a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        
+        .sidebar-divider {
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 1.7rem 0 1.1rem 0;
+            border: none;
+        }
+
+        .sidebar-profile {
+            width: 100%;
+            text-align: left;
+            color: #64748b;
+            font-size: 1.01rem;
+            font-family: 'Roboto', Arial, sans-serif;
+            margin-bottom: 1.2rem;
+            padding-left: 0.1rem;
+            padding-bottom: 0.2rem;
+            letter-spacing: 0.01em;
+        }
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem 2.7rem 2rem 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 2.5px solid #e2e8f0;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.05), 0 1.5px 12px rgba(0,0,0,0.03);
+            backdrop-filter: blur(18px) saturate(1.2);
+            background-clip: padding-box;
+            position: relative;
+            z-index: 1;
+        }
+        .hex-bg {
+            position: absolute;
+            z-index: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .hex-shape {
+            position: absolute;
+            opacity: 0.13;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .hex1 { left: 7vw; top: 8vh; width: 120px; }
+        .hex2 { right: 10vw; top: 18vh; width: 90px; }
+        .hex3 { left: 18vw; bottom: 12vh; width: 80px; }
+        .hex4 { right: 14vw; bottom: 8vh; width: 140px; }
+        .hex5 { left: 50vw; top: 50vh; width: 60px; }
+        .hex6 { left: 70vw; top: 70vh; width: 70px; }
+        .hex7 { left: 80vw; top: 10vh; width: 60px; }
+        .hex8 { left: 5vw; bottom: 20vh; width: 50px; }
+        .hex9 { right: 5vw; bottom: 25vh; width: 50px; }
+        .hex10 { left: 40vw; top: 80vh; width: 80px; }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 1.2rem 2.1rem 1.2rem 2.1rem;
+        }
+        .dashboard-header h1 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .dashboard-header .header-icons {
+            display: flex;
+            gap: 0.7em;
+        }
+        .dashboard-header .user-info {
+            display: none;
+        }
+        .widgets-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2.7rem;
+            flex-wrap: wrap;
+        }
+        .widget {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 20px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08), 0 1.5px 12px rgba(0,0,0,0.05);
+            padding: 2.1rem 2.5rem;
+            min-width: 220px;
+            flex: 1 1 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            border: 2.5px solid #e2e8f0;
+            transition: 
+                box-shadow 0.18s, 
+                border 0.18s, 
+                transform 0.18s,
+                background 0.18s;
+            background-image: linear-gradient(120deg, #ffffff 60%, #f1f5f9 100%);
+        }
+        .widget::before {
+            content: "";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 7px;
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 2;
+            opacity: 0.92;
+        }
+        .widget:hover::before {
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+            opacity: 1;
+        }
+        .widget:hover {
+            box-shadow: 0 12px 48px rgba(96,165,250,0.2), 0 4px 24px rgba(37,99,235,0.15);
+            border: 2.5px solid #60a5fa;
+            background: linear-gradient(120deg, #f8fafc 40%, rgba(96,165,250,0.1) 100%);
+            transform: translateY(-6px) scale(1.025);
+        }
+        .widget .widget-icon {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            width: 2.2em;
+            height: 2.2em;
+            opacity: 0.13;
+            filter: drop-shadow(0 2px 8px #60a5fa44);
+        }
+        .widget-title {
+            font-size: 1.18rem;
+            color: #60a5fa;
+            font-weight: 800;
+            margin-bottom: 0.7rem;
+            letter-spacing: 0.5px;
+            text-shadow: none;
+        }
+        .widget-value {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+            text-shadow: none;
+            letter-spacing: 1px;
+        }
+        .widget-desc {
+            font-size: 1.07rem;
+            color: #64748b;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2.7rem;
+            flex-wrap: wrap;
+        }
+        .quick-action {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            color: var(--accent);
+            border-radius: 14px;
+            padding: 1.1rem 1.7rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            cursor: pointer;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: background 0.18s, color 0.18s, border 0.18s;
+        }
+        .quick-action:hover {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            border: 1.5px solid #60a5fa;
+        }
+        .charts-row {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .chart-card {
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+            flex: 1 1 240px;
+            min-width: 220px;
+            max-width: 340px;
+            margin-bottom: 2rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08), 0 1.5px 12px rgba(0,0,0,0.05);
+            transition: box-shadow 0.18s, border 0.18s;
+        }
+
+        .chart-card:hover {
+            box-shadow: 0 8px 40px rgba(37,99,235,0.15), 0 2px 16px rgba(96,165,250,0.1);
+            border: 1.5px solid #60a5fa;
+        }
+        .chart-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            letter-spacing: 0.1px;
+        }
+        .chart-title svg {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
+        }
+        .recent-schedules-card {
+            min-width: 400px;
+            max-width: 500px;
+            min-height: 350px;
+            padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+        }
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .activity-list li {
+            padding: 0.7em 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 1.01rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+        }
+        .activity-list li:last-child {
+            border-bottom: none;
+        }
+        .activity-icon {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
+            opacity: 0.7;
+        }
+        @media (max-width: 900px) {
+            .widgets-row, .charts-row, .quick-actions {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            .main-content {
+                padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+            }
+        }
+        @media (max-width: 700px) {
+            .sidebar {
+                position: static;
+                width: 100vw;
+                min-height: unset;
+                flex-direction: row;
+                align-items: center;
+                padding: 1rem 0.5rem;
+                box-shadow: none;
+                background: var(--bg);
+            }
+            .sidebar h2 {
+                font-size: 1.1rem;
+                margin-bottom: 0;
+                margin-right: 1.2rem;
+            }
+            .sidebar nav {
+                display: flex;
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+            .sidebar nav a {
+                padding: 0.5rem 0.7rem;
+                font-size: 1rem;
+                margin-bottom: 0;
+            }
+            .sidebar .logout-btn {
+                margin-top: 0;
+                margin-left: 1rem;
+                padding: 0.5rem 0.9rem;
+                font-size: 0.98rem;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+            }
+        }
+        .calendar-card {
+            min-width: 240px;
+            max-width: 320px;
+            padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+        }
+        .calendar-widget {
+            width: 100%;
+            margin-top: 0.5em;
+        }
+        .calendar-header {
+            text-align: center;
+            color: #60a5fa;
+            font-weight: 700;
+            font-size: 1.08em;
+            margin-bottom: 0.5em;
+            letter-spacing: 0.5px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.2em;
+            background: none;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 0.45em 0;
+            border-radius: 7px;
+            font-size: 1.01em;
+            color: #e0e6ed;
+            background: rgba(59,130,246,0.07);
+            font-weight: 500;
+        }
+        .calendar-day-label {
+            color: #60a5fa;
+            background: none;
+            font-weight: 700;
+            font-size: 0.98em;
+            padding: 0.3em 0;
+        }
+        .calendar-day-empty {
+            background: none;
+            color: transparent;
+            pointer-events: none;
+        }
+        .calendar-day:hover:not(.calendar-day-label):not(.calendar-day-empty) {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            cursor: pointer;
+        }
+        .calendar-day.today {
+            background: #2563eb;
+            color: #fff;
+            font-weight: 700;
+        }
+        .notifications-card {
+            min-width: 400px;
+            max-width: 500px;
+            min-height: 350px;
+            padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+        }
+        .notifications-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.7em 0 0 0;
+        }
+        .notifications-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            font-size: 1.01em;
+            color: #64748b;
+            padding: 0.5em 0;
+            border-bottom: 1px solid rgba(226,232,240,0.5);
+        }
+        .notifications-list li:last-child {
+            border-bottom: none;
+        }
+        .notif-dot {
+            display: inline-block;
+            width: 0.85em;
+            height: 0.85em;
+            border-radius: 50%;
+            margin-right: 0.2em;
+            box-shadow: 0 1px 4px #23272b44;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>
+            <span class="sidebar-icons">
+                <!-- Shield Icon (Security/Auth) from login page -->
+
+                <!-- Sync/Refresh Icon from login page -->
+                <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                    <defs>
+                        <linearGradient id="sync-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#sync-grad)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/dashboard" class="active">
+                Dashboard
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/schedule">
+                My Schedule
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/notifications">
+                Notifications
+            </a>
+
+
+            <div class="nav-divider"></div>
+            <a href="/flashcards">
+                Flashcards
+            </a>
+            <div class="nav-divider"></div>
+        </nav>
+        <div style="flex:1;min-height:2rem;"></div>
+        <div style="width:100%;padding-bottom:1.2rem;margin-top:auto;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="
+                margin-bottom:0.5rem;
+                padding: 0;
+            ">
+                <a href="#" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.7em;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 0.85rem 1.1rem;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    font-size: 1.12rem;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    margin-bottom: 0.3rem;
+                " tabindex="-1">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    {{ session.get('user', 'User') }}
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <!-- Hexagon background shapes (copied from login.html) -->
+        <div class="hex-bg">
+            <svg class="hex-shape hex1" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#60a5fa"/>
+            </svg>
+            <svg class="hex-shape hex2" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#38bdf8"/>
+            </svg>
+            <svg class="hex-shape hex3" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#64748b"/>
+            </svg>
+            <svg class="hex-shape hex4" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#0ea5e9"/>
+            </svg>
+            <svg class="hex-shape hex5" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#3b82f6"/>
+            </svg>
+            <svg class="hex-shape hex6" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#1e293b"/>
+            </svg>
+            <svg class="hex-shape hex7" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#fbbf24"/>
+            </svg>
+            <svg class="hex-shape hex8" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#f472b6"/>
+            </svg>
+            <svg class="hex-shape hex9" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#a78bfa"/>
+            </svg>
+            <svg class="hex-shape hex10" viewBox="0 0 100 100">
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#34d399"/>
+            </svg>
+        </div>
+        <div class="dashboard-header">
+            <h1 style="font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;">
+                <span class="header-icons">
+                    <!-- Shield Icon -->
+                </span>
+                Welcome to your Dashboard
+            </h1>
+        </div>
+        <div class="widgets-row">
+            <div class="widget">
+                <span class="widget-icon">
+                    <!-- Shield Icon -->
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="shield-metal4" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#60a5fa"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M24 6L8 14v10c0 11 8 17 16 18 8-1 16-7 16-18V14L24 6z"
+                              fill="url(#shield-metal4)" stroke="#60a5fa" stroke-width="2"/>
+                        <path d="M24 24v8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="24" cy="22" r="2" fill="#fff"/>
+                    </svg>
+                </span>
+                <div class="widget-title">Upcoming Classes</div>
+                <div class="widget-value">{{ upcoming_classes }}</div>
+                <div class="widget-desc">{% if next_class %}Next: {{ next_class.title }} {% if next_class.time %}at {{ next_class.time.strftime('%I:%M %p') }}{% endif %}{% else %}No upcoming classes{% endif %}</div>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">
+                    <!-- Clock Icon -->
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="clock-metal3" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#60a5fa"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="24" cy="24" r="18" fill="url(#clock-metal3)" stroke="#60a5fa" stroke-width="2"/>
+                        <path d="M24 14v10l7 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <div class="widget-title">Exams This Week</div>
+                <div class="widget-value">{{ exams_this_week }}</div>
+                <div class="widget-desc">{% if next_exam %}{{ next_exam.title }} on {{ next_exam.date.strftime('%A') }}{% else %}No exams scheduled{% endif %}</div>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">
+                    <!-- Sync/Refresh Icon -->
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="sync-grad4" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#60a5fa"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="24" cy="24" r="18" fill="url(#sync-grad4)" stroke="#60a5fa" stroke-width="2"/>
+                        <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                        <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <div class="widget-title">Total Notifications</div>
+                <div class="widget-value">{{ total_notifications }}</div>
+                <div class="widget-desc">Check your latest updates</div>
+            </div>
+            <div class="widget">
+                <span class="widget-icon">
+                    <!-- Checklist Icon -->
+                    <svg viewBox="0 0 48 48" fill="none">
+                        <defs>
+                            <linearGradient id="tasks-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#34d399"/>
+                                <stop offset="1" stop-color="#23272b"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="8" y="12" width="32" height="24" rx="6" fill="url(#tasks-grad)" stroke="#34d399" stroke-width="2"/>
+                        <path d="M16 24l6 6 10-10" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <div class="widget-title">Tasks Due Soon</div>
+                <div class="widget-value">{{ tasks_due_soon }}</div>
+                <div class="widget-desc">{% if next_task %}Next: {{ next_task.title }}{% if next_task.date %} (Due {{ next_task.date.strftime('%A') }}){% endif %}{% else %}No tasks due{% endif %}</div>
+            </div>
+        </div>
+        <div class="quick-actions">
+            <button class="quick-action" onclick="window.location.href='/schedule'">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><rect x="3" y="5" width="18" height="16" rx="3" fill="#60a5fa"/><rect x="7" y="2" width="2" height="4" rx="1" fill="#60a5fa"/><rect x="15" y="2" width="2" height="4" rx="1" fill="#60a5fa"/></svg>
+                View Calendar
+            </button>
+            <button class="quick-action" onclick="window.location.href='/notifications'">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z" fill="#60a5fa"/></svg>
+                Reminders
+            </button>
+            <button class="quick-action" onclick="window.location.href='/flashcards'">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><rect x="2" y="6" width="20" height="12" rx="3" fill="#60a5fa"/><rect x="4" y="8" width="16" height="8" rx="2" fill="#fff"/></svg>
+                Flashcards
+            </button>
+
+        </div>
+        <div class="charts-row" style="justify-content: center; align-items: flex-start;">
+
+            <div class="chart-card" id="schedule-notes-widget" style="background:linear-gradient(135deg,#ffffff 60%,#f8fafc 100%);border-radius:20px;box-shadow:0 4px 32px rgba(0,0,0,0.08),0 1.5px 12px rgba(0,0,0,0.05);padding:1.5rem 1.5rem 1.2rem 1.5rem;min-width:400px;max-width:500px;min-height:350px;margin-bottom:2rem;border:1.5px solid #e2e8f0;border-left:4px solid #60a5fa;">
+                <div class="chart-title" style="font-size:1.3rem;font-weight:900;color:#000000;text-shadow:none;margin-bottom:1em;background:linear-gradient(90deg,rgba(59,130,246,0.1),transparent);padding:0.5rem 1rem;border-radius:8px;margin:-0.5rem -0.2rem 1rem -0.2rem;">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#60a5fa" stroke-width="2" fill="none"/></svg>
+                    Schedule Notes
+                </div>
+                <div style="width:100%;text-align:left;">
+                    {% if upcoming_classes > 0 %}
+                    <div style="padding:0.8rem;margin-bottom:0.8rem;background:#f8f9fa;border-left:3px solid #000;border-radius:8px;">
+                        <div style="font-weight:700;color:#000;margin-bottom:0.3rem;">📚 Upcoming Classes</div>
+                        <div style="color:#333;font-size:0.9rem;">You have {{ upcoming_classes }} class{{ 'es' if upcoming_classes != 1 else '' }} scheduled. {% if next_class %}Next: {{ next_class.title }}{% if next_class.time %} at {{ next_class.time.strftime('%I:%M %p') }}{% endif %}.{% endif %}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if exams_this_week > 0 %}
+                    <div style="padding:0.8rem;margin-bottom:0.8rem;background:#f8f9fa;border-left:3px solid #000;border-radius:8px;">
+                        <div style="font-weight:700;color:#000;margin-bottom:0.3rem;">📝 Exam Alert</div>
+                        <div style="color:#333;font-size:0.9rem;">{{ exams_this_week }} exam{{ 's' if exams_this_week != 1 else '' }} scheduled this week. {% if next_exam %}{{ next_exam.title }} is on {{ next_exam.date.strftime('%A') }}.{% endif %} Good luck!</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if tasks_due_soon > 0 %}
+                    <div style="padding:0.8rem;margin-bottom:0.8rem;background:#f8f9fa;border-left:3px solid #000;border-radius:8px;">
+                        <div style="font-weight:700;color:#000;margin-bottom:0.3rem;">⚠️ Tasks Due</div>
+                        <div style="color:#333;font-size:0.9rem;">{{ tasks_due_soon }} task{{ 's' if tasks_due_soon != 1 else '' }} due soon. {% if next_task %}{{ next_task.title }}{% if next_task.date %} is due {{ next_task.date.strftime('%A') }}{% endif %}.{% endif %} Don't forget!</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if upcoming_classes == 0 and exams_this_week == 0 and tasks_due_soon == 0 %}
+                    <div style="padding:1.5rem;text-align:center;background:#f8f9fa;border:2px dashed #000;border-radius:12px;">
+                        <div style="font-size:1.5rem;margin-bottom:0.5rem;">🎉</div>
+                        <div style="font-weight:700;color:#000;margin-bottom:0.3rem;">All Clear!</div>
+                        <div style="color:#333;font-size:0.9rem;">No urgent tasks or upcoming deadlines. Great job staying on top of your schedule!</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="chart-card notifications-card" style="border-left:4px solid #60a5fa;box-shadow:0 4px 32px rgba(59,130,246,0.12),0 1.5px 12px rgba(0,0,0,0.05);">
+                <div class="chart-title" style="background:linear-gradient(90deg,rgba(59,130,246,0.1),transparent);padding:0.5rem 1rem;border-radius:8px;margin:-0.5rem -0.2rem 1rem -0.2rem;">
+                    <!-- Bell Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z" fill="#60a5fa"/>
+                    </svg>
+                    Notifications
+                </div>
+                <ul class="notifications-list">
+                    {% if notifications %}
+                        {% for notification in notifications[:4] %}
+                        <li>
+                            <span class="notif-dot" style="background:{% if notification.type == 'quiz' %}#ef4444{% elif notification.type == 'exam' %}#fbbf24{% else %}#3b82f6{% endif %}"></span>
+                            {{ notification.title }}
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <li>
+                            <span class="notif-dot" style="background:#64748b"></span>
+                            No notifications available.
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="chart-card recent-schedules-card" style="border-left:4px solid #34d399;box-shadow:0 4px 32px rgba(52,211,153,0.12),0 1.5px 12px rgba(0,0,0,0.05);">
+                <div class="chart-title" style="background:linear-gradient(90deg,rgba(52,211,153,0.1),transparent);padding:0.5rem 1rem;border-radius:8px;margin:-0.5rem -0.2rem 1rem -0.2rem;">
+                    <!-- Activity Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="12" r="10" fill="#34d399" fill-opacity="0.2"/><path d="M12 6v6l4 2" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Recent Schedules
+                </div>
+                <ul class="activity-list">
+                    {% if past_schedules %}
+                        {% for schedule in past_schedules %}
+                        <li>
+                            <svg class="activity-icon" viewBox="0 0 24 24" fill="none">
+                                {% if schedule.type == 'exam' %}
+                                <rect x="4" y="4" width="16" height="16" rx="4" fill="#fbbf24"/>
+                                {% elif schedule.type == 'quiz' %}
+                                <rect x="3" y="4" width="18" height="16" rx="3" fill="#ef4444"/>
+                                {% else %}
+                                <rect x="3" y="4" width="18" height="16" rx="3" fill="#60a5fa"/>
+                                {% endif %}
+                            </svg>
+                            {{ schedule.title }} - {{ schedule.date.strftime('%m/%d') }}
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <li style="text-align:center;color:#64748b;font-style:italic;padding:2rem 1rem;background:linear-gradient(135deg,rgba(100,116,139,0.05),rgba(100,116,139,0.02));border:1px dashed #94a3b8;border-radius:8px;margin:1rem 0;">
+                            📅 You have no past schedules
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Academic Progress Section -->
+        <div style="background:linear-gradient(135deg,#ffffff 60%,#f8fafc 100%);border-radius:20px;box-shadow:0 4px 32px rgba(0,0,0,0.08),0 1.5px 12px rgba(0,0,0,0.05);padding:2rem;margin:2rem 0;border:1.5px solid #e2e8f0;border-left:4px solid #8b5cf6;">
+            <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;">
+                <svg viewBox="0 0 24 24" fill="none" width="1.5em" height="1.5em"><path d="M12 14l9-5-9-5-9 5 9 5z" fill="#8b5cf6"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" fill="#8b5cf6" fill-opacity="0.6"/></svg>
+                <h2 style="font-size:1.5rem;font-weight:800;color:#000;margin:0;">Academic Progress</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;">
+                <div style="padding:1.2rem;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(139,92,246,0.05));border:1px solid rgba(139,92,246,0.2);border-radius:12px;">
+                    <div style="font-weight:700;color:#000;margin-bottom:0.5rem;">📊 Current Semester</div>
+                    <div style="color:#333;font-size:0.9rem;line-height:1.5;">Track your academic performance and stay on top of your coursework. Monitor attendance, grades, and upcoming deadlines.</div>
+                </div>
+                <div style="padding:1.2rem;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(139,92,246,0.05));border:1px solid rgba(139,92,246,0.2);border-radius:12px;">
+                    <div style="font-weight:700;color:#000;margin-bottom:0.5rem;">🎯 Study Goals</div>
+                    <div style="color:#333;font-size:0.9rem;line-height:1.5;">Set and achieve your academic goals. Create study schedules and track your progress throughout the semester.</div>
+                </div>
+                <div style="padding:1.2rem;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(139,92,246,0.05));border:1px solid rgba(139,92,246,0.2);border-radius:12px;">
+                    <div style="font-weight:700;color:#000;margin-bottom:0.5rem;">📚 Course Materials</div>
+                    <div style="color:#333;font-size:0.9rem;line-height:1.5;">Access your course materials, assignments, and resources all in one place. Never miss important updates.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Study Tips Section -->
+        <div style="background:linear-gradient(135deg,#ffffff 60%,#f8fafc 100%);border-radius:20px;box-shadow:0 4px 32px rgba(0,0,0,0.08),0 1.5px 12px rgba(0,0,0,0.05);padding:2rem;margin:2rem 0;border:1.5px solid #e2e8f0;border-left:4px solid #f59e0b;">
+            <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;">
+                <svg viewBox="0 0 24 24" fill="none" width="1.5em" height="1.5em"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke="#f59e0b" stroke-width="2" fill="none"/></svg>
+                <h2 style="font-size:1.5rem;font-weight:800;color:#000;margin:0;">Study Tips & Resources</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+                <div style="padding:1.2rem;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.05));border:1px solid rgba(245,158,11,0.2);border-radius:12px;">
+                    <div style="font-weight:700;color:#000;margin-bottom:0.8rem;">💡 Effective Study Techniques</div>
+                    <ul style="color:#333;font-size:0.9rem;line-height:1.6;margin:0;padding-left:1.2rem;">
+                        <li>Use the Pomodoro Technique for focused study sessions</li>
+                        <li>Create mind maps to visualize complex concepts</li>
+                        <li>Practice active recall instead of passive reading</li>
+                        <li>Form study groups with classmates</li>
+                    </ul>
+                </div>
+                <div style="padding:1.2rem;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.05));border:1px solid rgba(245,158,11,0.2);border-radius:12px;">
+                    <div style="font-weight:700;color:#000;margin-bottom:0.8rem;">⏰ Time Management</div>
+                    <ul style="color:#333;font-size:0.9rem;line-height:1.6;margin:0;padding-left:1.2rem;">
+                        <li>Plan your week every Sunday evening</li>
+                        <li>Break large tasks into smaller, manageable chunks</li>
+                        <li>Use your calendar to block time for studying</li>
+                        <li>Set realistic deadlines and stick to them</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Status Section -->
+        <div style="background:linear-gradient(135deg,#ffffff 60%,#f8fafc 100%);border-radius:20px;box-shadow:0 4px 32px rgba(0,0,0,0.08),0 1.5px 12px rgba(0,0,0,0.05);padding:2rem;margin:2rem 0;border:1.5px solid #e2e8f0;border-left:4px solid #10b981;">
+            <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;">
+                <svg viewBox="0 0 24 24" fill="none" width="1.5em" height="1.5em"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2" fill="none"/><path d="M9 12l2 2 4-4" stroke="#10b981" stroke-width="2" fill="none"/></svg>
+                <h2 style="font-size:1.5rem;font-weight:800;color:#000;margin:0;">System Status</h2>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1.2rem;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.2);border-radius:8px;">
+                    <div style="width:8px;height:8px;background:#10b981;border-radius:50%;"></div>
+                    <span style="color:#333;font-size:0.9rem;font-weight:600;">All Systems Operational</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1.2rem;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.2);border-radius:8px;">
+                    <div style="width:8px;height:8px;background:#10b981;border-radius:50%;"></div>
+                    <span style="color:#333;font-size:0.9rem;font-weight:600;">Database Connected</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1.2rem;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.2);border-radius:8px;">
+                    <div style="width:8px;height:8px;background:#10b981;border-radius:50%;"></div>
+                    <span style="color:#333;font-size:0.9rem;font-weight:600;">Notifications Active</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1.2rem;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.2);border-radius:8px;">
+                    <div style="width:8px;height:8px;background:#10b981;border-radius:50%;"></div>
+                    <span style="color:#333;font-size:0.9rem;font-weight:600;">Last Updated: Just Now</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+
+
+        // Events from database
+        const events = {};
+        {% if notifications %}
+            {% for notification in notifications %}
+                {% if notification.date %}
+                    const dateKey = '{{ notification.date.strftime("%Y-%m-%d") }}';
+                    if (!events[dateKey]) events[dateKey] = [];
+                    events[dateKey].push({
+                        type: '{{ notification.type }}',
+                        text: '{{ notification.title }} - {% if notification.time %}{{ notification.time.strftime("%I:%M %p") }}{% else %}TBA{% endif %}'
+                    });
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        function eventIcon(type) {
+            if (type === "class") return "📘";
+            if (type === "exam") return "📝";
+            if (type === "reminder") return "🔔";
+            return "•";
+        }
+
+        // Quick Stats widget is now static and populated from backend
+    </script>
+</body>
+</html>

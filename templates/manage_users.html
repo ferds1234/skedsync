@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        .dashboard-header h1 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s;
+        }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            border-left: 4px solid #60a5fa;
+            font-weight: 600;
+        }
+        .sidebar nav a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 1.5rem 2rem;
+        }
+        .page-title {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .users-container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            padding: 2rem;
+            border: 1.5px solid #e2e8f0;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            background: #f8fafc;
+        }
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .users-table th,
+        .users-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .users-table th {
+            background: #1b3868;
+            font-weight: 600;
+            color: #ffffff;
+            border-radius: 10px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-details h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .user-details p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin: 0 0.2rem;
+        }
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: #ffffff;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 20px;
+            border: 1.5px solid #e2e8f0;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>
+            <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                <circle cx="24" cy="24" r="18" fill="#60a5fa" stroke="#60a5fa" stroke-width="2"/>
+                <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/admindashboard">Admin Dashboard</a>
+            <div class="nav-divider"></div>
+            <a href="/users" class="active">Manage Users</a>
+            <div class="nav-divider"></div>
+            <a href="/schedules">Manage Schedules</a>
+            <div class="nav-divider"></div>
+            <a href="/reports">Reports</a>
+            <div class="nav-divider"></div>
+
+        </nav>
+        <div style="flex:1"></div>
+        <div style="width:100%;padding-bottom:1.2rem;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="
+                margin-bottom:0.5rem;
+                padding: 0;
+            ">
+                <a href="#" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.7em;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 0.85rem 1.1rem;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    font-size: 1.12rem;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    margin-bottom: 0.3rem;
+                " tabindex="-1">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    Admin
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Manage Users</h1>
+            <button onclick="openModal('facultyModal')" class="btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                    <path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Add Faculty Account
+            </button>
+        </div>
+
+        <div class="users-container">
+            <input type="text" class="search-bar" placeholder="Search users by name, email, or student ID..." id="searchInput">
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <select id="departmentFilter" style="padding: 0.6rem; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                    <option value="">All Departments</option>
+                    <option value="BS in Information Technology">BS in Information Technology</option>
+                    <option value="BS in Computer Science">BS in Computer Science</option>
+                    <option value="BS in Information Systems">BS in Information Systems</option>
+                    <option value="BSED (major in English)">BSED (major in English)</option>
+                    <option value="BSED (major in Math)">BSED (major in Math)</option>
+                    <option value="BS in Criminology">BS in Criminology</option>
+                    <option value="BS in Business Administration">BS in Business Administration</option>
+                    <option value="BS in Civil Engineering">BS in Civil Engineering</option>>BS in Forestry</option>
+                    <option value="BS in Fisheries">BS in Fisheries</option>
+                    <option value="Masters">Master's and Doctorate programs</option>
+                    <option value="Other">Other</option>
+                </select>
+                
+                <select id="yearFilter" style="padding: 0.6rem; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                    <option value="">All Year Levels</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                    <option value="5">5th Year</option>
+                </select>
+                
+                <select id="sectionFilter" style="padding: 0.6rem; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                    <option value="">All Sections</option>
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                </select>
+                
+                <select id="statusFilter" style="padding: 0.6rem; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Student ID</th>
+                        <th>Department</th>
+                        <th>Year Level</th>
+                        <th>Section</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">{{ user.name[0]|upper if user.name else 'U' }}</div>
+                                <div class="user-details">
+                                    <h4>{{ user.name or 'Unknown' }}</h4>
+                                    <p>{{ user.email or 'No email' }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user.student_id or 'N/A' }}</td>
+                        <td>{{ user.department or 'N/A' }}</td>
+                        <td>{{ user.year_level or 'N/A' }}</td>
+                        <td>{{ user.section or 'N/A' }}</td>
+                        <td><span class="status-badge {{ 'status-active' if user.status == 'active' else 'status-inactive' }}">{{ user.status|title or 'Active' }}</span></td>
+                        <td>
+                            {% if user.email != 'admin@skedsync.com' %}
+                            <button class="action-btn btn-delete" onclick="deleteUser('{{ user.id }}')">
+                                <svg viewBox="0 0 24 24" fill="none" width="1em" height="1em" style="margin-right: 0.3rem;">
+                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Delete
+                            </button>
+                            {% else %}
+                            <span style="color: #64748b; font-size: 0.8rem;">Admin</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #64748b; padding: 2rem;">No users found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Faculty Account Modal -->
+    <div id="facultyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('facultyModal')" style="color: #64748b; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="color: #60a5fa; margin-bottom: 1.5rem;">Add Faculty Account</h2>
+            <form id="facultyForm" method="post" action="/create-faculty">
+                <div class="form-group">
+                    <label for="faculty_id">Faculty ID:</label>
+                    <input type="text" id="faculty_id" name="faculty_id" required placeholder="e.g., FAC001">
+                </div>
+                <div class="form-group">
+                    <label for="faculty_name">Full Name:</label>
+                    <input type="text" id="faculty_name" name="name" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label for="faculty_email">Email:</label>
+                    <input type="email" id="faculty_email" name="email" required placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="faculty_department">Department:</label>
+                    <select id="faculty_department" name="department" required>
+                        <option value="" disabled selected>Select Department</option>
+                        <option value="BS in Information Technology">BS in Information Technology</option>
+                        <option value="BS in Computer Science">BS in Computer Science</option>
+                        <option value="BS in Information Systems">BS in Information Systems</option>
+                        <option value="BSED (major in English)">BSED (major in English)</option>
+                        <option value="BSED (major in Math)">BSED (major in Math)</option>
+                        <option value="BS in Criminology">BS in Criminology</option>
+                        <option value="BS in Business Administration">BS in Business Administration</option>
+                        <option value="BS in Civil Engineering">BS in Civil Engineering</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="faculty_password">Password:</label>
+                    <input type="password" id="faculty_password" name="password" required placeholder="Enter password">
+                </div>
+                <div class="form-group">
+                    <label for="faculty_confirm_password">Confirm Password:</label>
+                    <input type="password" id="faculty_confirm_password" name="confirm_password" required placeholder="Confirm password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('facultyModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Create Faculty Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function editUser(userId) {
+            alert('Edit user ' + userId);
+        }
+        
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                fetch(`/users/delete/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User deleted successfully!');
+                        location.reload(); // Refresh the page to update the user list
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error deleting user: ' + error.message);
+                });
+            }
+        }
+        
+        // Search and filter functionality
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const departmentFilter = document.getElementById('departmentFilter').value.toLowerCase();
+            const yearFilter = document.getElementById('yearFilter').value.toLowerCase();
+            const sectionFilter = document.getElementById('sectionFilter').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const rows = document.querySelectorAll('#usersTableBody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 6) return;
+                
+                const text = row.textContent.toLowerCase();
+                const department = cells[2].textContent.toLowerCase();
+                const year = cells[3].textContent.toLowerCase();
+                const section = cells[4].textContent.toLowerCase();
+                const status = cells[5].textContent.toLowerCase();
+                
+                const matchesSearch = !searchTerm || text.includes(searchTerm);
+                const matchesDepartment = !departmentFilter || department.includes(departmentFilter);
+                const matchesYear = !yearFilter || year.includes(yearFilter);
+                const matchesSection = !sectionFilter || section.includes(sectionFilter);
+                const matchesStatus = !statusFilter || status.includes(statusFilter);
+                
+                row.style.display = (matchesSearch && matchesDepartment && matchesYear && matchesSection && matchesStatus) ? '' : 'none';
+            });
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', filterUsers);
+        document.getElementById('departmentFilter').addEventListener('change', filterUsers);
+        document.getElementById('yearFilter').addEventListener('change', filterUsers);
+        document.getElementById('sectionFilter').addEventListener('change', filterUsers);
+        document.getElementById('statusFilter').addEventListener('change', filterUsers);
+        
+        // Faculty form validation
+        document.getElementById('facultyForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('faculty_password').value;
+            const confirmPassword = document.getElementById('faculty_confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters long!');
+                return false;
+            }
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

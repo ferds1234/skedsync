@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Schedules - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s;
+        }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            border-left: 4px solid #60a5fa;
+            font-weight: 600;
+        }
+        .sidebar nav a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 1.5rem 2rem;
+        }
+        .page-title {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: #ffffff;
+            margin: 3% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            border: 1.5px solid #e2e8f0;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        .announcements-actions {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            border: 1.5px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+        .announced-items {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #f8fafc 60%, #e2e8f0 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+            border: 2px solid #e2e8f0;
+        }
+        .announced-container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+            padding: 2rem;
+            border: 2px solid #e2e8f0;
+            flex: 1 1 400px;
+            min-width: 400px;
+            min-height: 400px;
+        }
+        .container-header {
+            color: #ffffff;
+            margin: -2rem -2rem 1.5rem -2rem;
+            padding: 1.5rem 2rem;
+            border-radius: 16px 16px 0 0;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .quiz-header { background: #ef4444; }
+        .exam-header { background: #fbbf24; }
+        .room-header { background: #3b82f6; }
+        .announcement-item {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border: 1.5px solid #e2e8f0;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .announcement-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            cursor: pointer;
+        }
+        .announcement-content {
+            flex: 1;
+            pointer-events: none;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e2e8f0;
+        }
+        .pagination button {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .pagination button:hover {
+            background: #f1f5f9;
+        }
+        .pagination span {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+            background: #ffffff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            border: 1.5px solid #e2e8f0;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-edit {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        .btn-delete {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .search-container {
+            position: relative;
+        }
+        .search-input {
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            min-width: 300px;
+            font-size: 1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.15);
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-edit {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        .btn-delete {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>
+            <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                <circle cx="24" cy="24" r="18" fill="#60a5fa" stroke="#60a5fa" stroke-width="2"/>
+                <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/admindashboard">Admin Dashboard</a>
+            <div class="nav-divider"></div>
+            <a href="/users">Manage Users</a>
+            <div class="nav-divider"></div>
+            <a href="/schedules" class="active">Manage Schedules</a>
+            <div class="nav-divider"></div>
+            <a href="/reports">Reports</a>
+        </nav>
+        <div style="flex:1"></div>
+        <div style="width:100%;padding-bottom:1.2rem;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="margin-bottom:0.5rem; padding: 0;">
+                <a href="#" style="display: flex; align-items: center; gap: 0.7em; color: #fff; text-decoration: none; padding: 0.85rem 1.1rem; border-radius: 12px; font-weight: 500; font-size: 1.12rem; background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%); margin-bottom: 0.3rem;" tabindex="-1">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    Admin
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">Sign out</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}" style="background: {{ '#d4edda' if category == 'success' else '#f8d7da' }}; color: {{ '#155724' if category == 'success' else '#721c24' }}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid {{ '#c3e6cb' if category == 'success' else '#f5c6cb' }};">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="page-header">
+            <h1 class="page-title">Manage Schedules</h1>
+            <div class="search-container">
+                <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em" class="search-icon">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="text" id="searchFilter" placeholder="Search announcements..." class="search-input">
+            </div>
+        </div>
+
+        <div class="announcements-actions">
+            <h3 style="color: #1e293b; margin-bottom: 1rem; font-weight: 700;">Create Announcements</h3>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button class="btn-primary" onclick="openModal('quizAnnouncementModal')" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                    Announce Quiz
+                </button>
+                <button class="btn-primary" onclick="openModal('examAnnouncementModal')" style="background: linear-gradient(135deg, #fbbf24, #fcd34d);">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                    Announce Exam
+                </button>
+                <button class="btn-primary" onclick="openModal('roomAnnouncementModal')" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Room Update
+                </button>
+            </div>
+        </div>
+
+        <div class="announced-items">
+            <div class="announced-container" id="quizContainer">
+                <h3 class="container-header quiz-header">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.4em" height="1.4em">
+                        <path d="M9 12l2 2 4-4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="10" stroke="#ffffff" stroke-width="2" fill="none"/>
+                    </svg>
+                    Announced Quizzes
+                </h3>
+                <div id="announcedQuizzes" style="min-height: 300px;">
+                    {% for announcement in announcements %}
+                    {% if announcement.type == 'quiz' %}
+                    <div class="announcement-item quiz-item" onclick="showAnnouncementDetails({{ announcement.id }}, '{{ announcement.title|e }}', '{{ announcement.description|e }}', '{{ announcement.subject or 'N/A' }}', '{{ announcement.date.strftime('%B %d, %Y') if announcement.date else 'N/A' }}', '{{ announcement.time.strftime('%I:%M %p') if announcement.time else 'N/A' }}', '{{ announcement.room or 'TBA' }}', '{{ announcement.duration or 'N/A' }}', '{{ announcement.instructions|e if announcement.instructions else 'No additional instructions' }}', '{{ announcement.department or 'N/A' }}', '{{ announcement.year_level or 'N/A' }}', '{{ announcement.section or 'N/A' }}', 'quiz')">
+                        <div class="announcement-content">
+                            <div style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">{{ announcement.title }}</div>
+                            <div style="font-size: 0.9rem; color: #64748b; margin-top: 0.3rem;">
+                                <span style="color: #3b82f6; font-weight: 600;">{{ announcement.subject or 'N/A' }}</span> - 
+                                {% if announcement.date %}{{ announcement.date.strftime('%B %d, %Y') }}{% endif %}
+                                {% if announcement.time %}at {{ announcement.time.strftime('%I:%M %p') }}{% endif %}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #64748b;">
+                                Room: {{ announcement.room or 'TBA' }} | Duration: {{ announcement.duration or 'N/A' }} minutes
+                            </div>
+                        </div>
+                        <div class="action-buttons" style="pointer-events: auto;">
+                            <button class="btn-edit" onclick="event.stopPropagation(); editAnnouncement({{ announcement.id }})">Edit</button>
+                            <button class="btn-delete" onclick="event.stopPropagation(); deleteAnnouncement({{ announcement.id }})">Delete</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <button onclick="previousPage('quiz')">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        Previous
+                    </button>
+                    <span>Page 1</span>
+                    <button onclick="nextPage('quiz')">
+                        Next
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="announced-container" id="examContainer">
+                <h3 class="container-header exam-header">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#ffffff" stroke-width="2" fill="none"/>
+                        <polyline points="14,2 14,8 20,8" stroke="#ffffff" stroke-width="2" fill="none"/>
+                    </svg>
+                    Announced Exams
+                </h3>
+                <div id="announcedExams" style="min-height: 300px;">
+                    {% for announcement in announcements %}
+                    {% if announcement.type == 'exam' %}
+                    <div class="announcement-item exam-item" onclick="showAnnouncementDetails({{ announcement.id }}, '{{ announcement.title|e }}', '{{ announcement.description|e }}', '{{ announcement.subject or 'N/A' }}', '{{ announcement.date.strftime('%B %d, %Y') if announcement.date else 'N/A' }}', '{{ announcement.time.strftime('%I:%M %p') if announcement.time else 'N/A' }}', '{{ announcement.room or 'TBA' }}', '{{ announcement.duration or 'N/A' }}', '{{ announcement.instructions|e if announcement.instructions else 'No additional instructions' }}', '{{ announcement.department or 'N/A' }}', '{{ announcement.year_level or 'N/A' }}', '{{ announcement.section or 'N/A' }}', 'exam')">
+                        <div class="announcement-content">
+                            <div style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">{{ announcement.title }}</div>
+                            <div style="font-size: 0.9rem; color: #64748b; margin-top: 0.3rem;">
+                                <span style="color: #3b82f6; font-weight: 600;">{{ announcement.subject or 'N/A' }}</span> - 
+                                {% if announcement.date %}{{ announcement.date.strftime('%B %d, %Y') }}{% endif %}
+                                {% if announcement.time %}at {{ announcement.time.strftime('%I:%M %p') }}{% endif %}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #64748b;">
+                                Room: {{ announcement.room or 'TBA' }} | Duration: {{ announcement.duration or 'N/A' }} minutes
+                            </div>
+                        </div>
+                        <div class="action-buttons" style="pointer-events: auto;">
+                            <button class="btn-edit" onclick="event.stopPropagation(); editAnnouncement({{ announcement.id }})">Edit</button>
+                            <button class="btn-delete" onclick="event.stopPropagation(); deleteAnnouncement({{ announcement.id }})">Delete</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <button onclick="previousPage('exam')">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        Previous
+                    </button>
+                    <span>Page 1</span>
+                    <button onclick="nextPage('exam')">
+                        Next
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="announced-container" id="roomContainer">
+                <h3 class="container-header room-header">
+                    <svg viewBox="0 0 24 24" fill="none" width="1.4em" height="1.4em">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#ffffff" stroke-width="2" fill="none"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="#ffffff" stroke-width="2"/>
+                    </svg>
+                    Room Updates
+                </h3>
+                <div id="announcedRooms" style="min-height: 300px;">
+                    {% for announcement in announcements %}
+                    {% if announcement.type == 'room' %}
+                    <div class="announcement-item room-item" onclick="showAnnouncementDetails({{ announcement.id }}, '{{ announcement.title|e }}', '{{ announcement.description|e }}', '{{ announcement.subject or 'N/A' }}', '{{ announcement.date.strftime('%B %d, %Y') if announcement.date else 'N/A' }}', '{{ announcement.time.strftime('%I:%M %p') if announcement.time else 'N/A' }}', '{{ announcement.room or 'TBA' }}', '{{ announcement.duration or 'N/A' }}', '{{ announcement.instructions|e if announcement.instructions else 'No additional instructions' }}', '{{ announcement.department or 'N/A' }}', '{{ announcement.year_level or 'N/A' }}', '{{ announcement.section or 'N/A' }}', 'room')">
+                        <div class="announcement-content">
+                            <div style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">{{ announcement.title }}</div>
+                            <div style="font-size: 0.9rem; color: #64748b; margin-top: 0.3rem;">
+                                <span style="color: #3b82f6; font-weight: 600;">{{ announcement.subject or 'N/A' }}</span> - 
+                                {% if announcement.date %}{{ announcement.date.strftime('%B %d, %Y') }}{% endif %}
+                                {% if announcement.time %}at {{ announcement.time.strftime('%I:%M %p') }}{% endif %}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #64748b;">
+                                Room: {{ announcement.room or 'TBA' }} | Duration: {{ announcement.duration or 'N/A' }} minutes
+                            </div>
+                        </div>
+                        <div class="action-buttons" style="pointer-events: auto;">
+                            <button class="btn-edit" onclick="event.stopPropagation(); editAnnouncement({{ announcement.id }})">Edit</button>
+                            <button class="btn-delete" onclick="event.stopPropagation(); deleteAnnouncement({{ announcement.id }})">Delete</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <button onclick="previousPage('room')">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        Previous
+                    </button>
+                    <span>Page 1</span>
+                    <button onclick="nextPage('room')">
+                        Next
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quiz Announcement Modal -->
+    <div id="quizAnnouncementModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ef4444;">Announce Quiz</h3>
+            <form method="POST" action="/announcements/create">
+                <input type="hidden" name="announcement_type" value="quiz">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" placeholder="e.g., Math 101 Quiz" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="Quiz details and instructions" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" name="time" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <input type="number" name="duration" placeholder="e.g., 60" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Room</label>
+                        <select name="room" required>
+                            <option value="">Select Room</option>
+                            <option value="Room 101">Room 101</option>
+                            <option value="Room 102">Room 102</option>
+                            <option value="Room 103">Room 103</option>
+                            <option value="Lab 1">Lab 1</option>
+                            <option value="Lab 2">Lab 2</option>
+                            <option value="Lab 3">Lab 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" placeholder="e.g., Mathematics, Physics" required>
+                </div>
+                <div class="form-group">
+                    <label>Instructions</label>
+                    <textarea name="instructions" rows="3" placeholder="Additional instructions for students"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Target Department</label>
+                        <select name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="BS in Information Technology">BS in Information Technology</option>
+                            <option value="BS in Computer Science">BS in Computer Science</option>
+                            <option value="BS in Information Systems">BS in Information Systems</option>
+                            <option value="BSED (major in English)">BSED (major in English)</option>
+                            <option value="BSED (major in Math)">BSED (major in Math)</option>
+                            <option value="BS in Criminology">BS in Criminology</option>
+                            <option value="BS in Business Administration">BS in Business Administration</option>
+                            <option value="BS in Civil Engineering">BS in Civil Engineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Year Level</label>
+                        <select name="year_level" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                            <option value="5">5th Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Target Section</label>
+                    <select name="section" required>
+                        <option value="">Select Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('quizAnnouncementModal')">Cancel</button>
+                    <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #ef4444, #f87171);">Announce Quiz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Announcement Modal -->
+    <div id="examAnnouncementModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #fbbf24;">Announce Exam</h3>
+            <form method="POST" action="/announcements/create">
+                <input type="hidden" name="announcement_type" value="exam">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" placeholder="e.g., Physics Final Exam" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="Exam details, requirements, and instructions" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" name="time" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <input type="number" name="duration" placeholder="e.g., 120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Room</label>
+                        <select name="room" required>
+                            <option value="">Select Room</option>
+                            <option value="Room 101">Room 101</option>
+                            <option value="Room 102">Room 102</option>
+                            <option value="Room 103">Room 103</option>
+                            <option value="Lab 1">Lab 1</option>
+                            <option value="Lab 2">Lab 2</option>
+                            <option value="Lab 3">Lab 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" placeholder="e.g., Chemistry, Biology" required>
+                </div>
+                <div class="form-group">
+                    <label>Instructions</label>
+                    <textarea name="instructions" rows="3" placeholder="Additional instructions for students"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Target Department</label>
+                        <select name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="BS in Information Technology">BS in Information Technology</option>
+                            <option value="BS in Computer Science">BS in Computer Science</option>
+                            <option value="BS in Information Systems">BS in Information Systems</option>
+                            <option value="BSED (major in English)">BSED (major in English)</option>
+                            <option value="BSED (major in Math)">BSED (major in Math)</option>
+                            <option value="BS in Criminology">BS in Criminology</option>
+                            <option value="BS in Business Administration">BS in Business Administration</option>
+                            <option value="BS in Civil Engineering">BS in Civil Engineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Year Level</label>
+                        <select name="year_level" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                            <option value="5">5th Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Target Section</label>
+                    <select name="section" required>
+                        <option value="">Select Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('examAnnouncementModal')">Cancel</button>
+                    <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #fbbf24, #fcd34d);">Announce Exam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Room Announcement Modal -->
+    <div id="roomAnnouncementModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #3b82f6;">Room Update</h3>
+            <form method="POST" action="/announcements/create">
+                <input type="hidden" name="announcement_type" value="room">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" placeholder="e.g., Room 205 Unavailable" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="Room update details, reason, alternative room if applicable" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" name="time" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <input type="number" name="duration" placeholder="e.g., 30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Room</label>
+                        <select name="room" required>
+                            <option value="">Select Room</option>
+                            <option value="Room 101">Room 101</option>
+                            <option value="Room 102">Room 102</option>
+                            <option value="Room 103">Room 103</option>
+                            <option value="Lab 1">Lab 1</option>
+                            <option value="Lab 2">Lab 2</option>
+                            <option value="Lab 3">Lab 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subject/Event</label>
+                    <input type="text" name="subject" placeholder="e.g., General Assembly, Maintenance" required>
+                </div>
+                <div class="form-group">
+                    <label>Instructions</label>
+                    <textarea name="instructions" rows="3" placeholder="Additional instructions for attendees"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Target Department</label>
+                        <select name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="BS in Information Technology">BS in Information Technology</option>
+                            <option value="BS in Computer Science">BS in Computer Science</option>
+                            <option value="BS in Information Systems">BS in Information Systems</option>
+                            <option value="BSED (major in English)">BSED (major in English)</option>
+                            <option value="BSED (major in Math)">BSED (major in Math)</option>
+                            <option value="BS in Criminology">BS in Criminology</option>
+                            <option value="BS in Business Administration">BS in Business Administration</option>
+                            <option value="BS in Civil Engineering">BS in Civil Engineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Year Level</label>
+                        <select name="year_level" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                            <option value="5">5th Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Target Section</label>
+                    <select name="section" required>
+                        <option value="">Select Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('roomAnnouncementModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Update Room Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Announcement Details Modal -->
+    <div id="announcementDetailsModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 id="detailsTitle" style="margin: 0;">Announcement Details</h3>
+                <button onclick="closeModal('announcementDetailsModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <div id="detailsContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = { quiz: 1, exam: 1, room: 1 };
+        const itemsPerPage = 5;
+
+        function showPage(type, page) {
+            const container = document.getElementById(`announced${type.charAt(0).toUpperCase() + type.slice(1)}s`);
+            const items = container.getElementsByClassName(`${type}-item`);
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            
+            Array.from(items).forEach((item, index) => {
+                item.style.display = (index >= start && index < end) ? 'flex' : 'none';
+            });
+            
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+            const container2 = document.getElementById(`${type}Container`);
+            const pageSpan = container2.querySelector('.pagination span');
+            pageSpan.textContent = `Page ${page} of ${totalPages}`;
+            
+            // Update button states
+            const prevButton = container2.querySelector('.pagination button:first-child');
+            const nextButton = container2.querySelector('.pagination button:last-child');
+            
+            prevButton.disabled = page === 1;
+            nextButton.disabled = page === totalPages;
+            prevButton.style.opacity = page === 1 ? '0.5' : '1';
+            nextButton.style.opacity = page === totalPages ? '0.5' : '1';
+        }
+
+        function nextPage(type) {
+            const container = document.getElementById(`announced${type.charAt(0).toUpperCase() + type.slice(1)}s`);
+            const items = container.getElementsByClassName(`${type}-item`);
+            const maxPage = Math.ceil(items.length / itemsPerPage);
+            
+            if (currentPage[type] < maxPage) {
+                currentPage[type]++;
+                showPage(type, currentPage[type]);
+            }
+        }
+
+        function previousPage(type) {
+            if (currentPage[type] > 1) {
+                currentPage[type]--;
+                showPage(type, currentPage[type]);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            ['quiz', 'exam', 'room'].forEach(type => {
+                showPage(type, 1);
+            });
+            
+            document.getElementById('searchFilter').addEventListener('input', filterAnnouncements);
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.min = today;
+            });
+            
+            // Add click handlers to announcement items
+            document.querySelectorAll('.announcement-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (!e.target.closest('.action-buttons')) {
+                        const title = this.querySelector('div[style*="font-weight: 700"]').textContent;
+                        showDetails(title, '', 'announcement', '', '', '', '', '', '', '', '', '');
+                    }
+                });
+            });
+        });
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function filterAnnouncements() {
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            const items = document.querySelectorAll('.announcement-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const show = !searchFilter || text.includes(searchFilter);
+                item.style.display = show ? 'flex' : 'none';
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        function showDetails(title, description, type, subject, room, date, time, duration, instructions, department, year, section) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 style="color: ${type === 'quiz' ? '#ef4444' : type === 'exam' ? '#fbbf24' : '#3b82f6'}; margin-bottom: 1.5rem;">${title}</h3>
+                    <div style="margin-bottom: 1rem;"><strong>Type:</strong> ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Description:</strong><br><p style="margin: 0.5rem 0; padding: 1rem; background: #f8fafc; border-radius: 8px;">${description || 'No description provided'}</p></div>
+                    <div style="margin-bottom: 1rem;"><strong>Subject:</strong> ${subject || 'N/A'}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Room:</strong> ${room || 'TBA'}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Date:</strong> ${date || 'TBA'}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Time:</strong> ${time || 'TBA'}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Duration:</strong> ${duration || 'N/A'} minutes</div>
+                    <div style="margin-bottom: 1rem;"><strong>Department:</strong> ${department || 'N/A'}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Year Level:</strong> ${year || 'N/A'}</div>
+                    <div style="margin-bottom: 1rem;"><strong>Section:</strong> ${section || 'N/A'}</div>
+                    ${instructions ? `<div style="margin-bottom: 1rem;"><strong>Instructions:</strong><br><p style="margin: 0.5rem 0; padding: 1rem; background: #f8fafc; border-radius: 8px;">${instructions}</p></div>` : ''}
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function editAnnouncement(id) {
+            const announcementItem = event.target.closest('.announcement-item');
+            const title = announcementItem.querySelector('div[style*="font-weight: 700"]').textContent;
+            const subjectSpan = announcementItem.querySelector('span[style*="color: #3b82f6"]');
+            const subject = subjectSpan ? subjectSpan.textContent : '';
+            
+            const data = {
+                id: id,
+                title: title,
+                subject: subject,
+                description: '',
+                date: '',
+                time: '',
+                duration: '',
+                room: ''
+            };
+            
+            showEditModal(data);
+        }
+
+        function deleteAnnouncement(id) {
+            if (confirm('Are you sure you want to delete this announcement?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/announcements/delete/${id}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function showAnnouncementDetails(id, title, description, subject, date, time, room, duration, instructions, department, yearLevel, section, type) {
+            const typeColors = {
+                quiz: '#ef4444',
+                exam: '#fbbf24', 
+                room: '#3b82f6'
+            };
+            
+            const typeIcons = {
+                quiz: '<svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+                exam: '<svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+                room: '<svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/></svg>'
+            };
+            
+            document.getElementById('detailsTitle').innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: ${typeColors[type]};">
+                    ${typeIcons[type]}
+                    ${title}
+                </div>
+            `;
+            
+            document.getElementById('detailsContent').innerHTML = `
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b;">Description</h4>
+                    <p style="margin: 0; color: #64748b; line-height: 1.6;">${description}</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="background: #ffffff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Subject</h5>
+                        <p style="margin: 0; color: #1e293b; font-weight: 600;">${subject}</p>
+                    </div>
+                    <div style="background: #ffffff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Room</h5>
+                        <p style="margin: 0; color: #1e293b; font-weight: 600;">${room}</p>
+                    </div>
+                    <div style="background: #ffffff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Date & Time</h5>
+                        <p style="margin: 0; color: #1e293b; font-weight: 600;">${date} at ${time}</p>
+                    </div>
+                    <div style="background: #ffffff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Duration</h5>
+                        <p style="margin: 0; color: #1e293b; font-weight: 600;">${duration} minutes</p>
+                    </div>
+                </div>
+                
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b;">Target Audience</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem;">Department</h5>
+                            <p style="margin: 0; color: #1e293b; font-weight: 600; font-size: 0.9rem;">${department}</p>
+                        </div>
+                        <div>
+                            <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem;">Year Level</h5>
+                            <p style="margin: 0; color: #1e293b; font-weight: 600; font-size: 0.9rem;">${yearLevel}</p>
+                        </div>
+                        <div>
+                            <h5 style="margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.85rem;">Section</h5>
+                            <p style="margin: 0; color: #1e293b; font-weight: 600; font-size: 0.9rem;">${section}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffffff; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b;">Instructions</h4>
+                    <p style="margin: 0; color: #64748b; line-height: 1.6;">${instructions}</p>
+                </div>
+            `;
+            
+            openModal('announcementDetailsModal');
+        }
+
+        function showEditModal(data) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Edit Announcement</h3>
+                    <form method="POST" action="/announcements/edit/${data.id}">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="title" value="${data.title}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" rows="3" required>${data.description || ''}</textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" name="date" value="${data.date || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" name="time" value="${data.time || ''}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Duration (minutes)</label>
+                                <input type="number" name="duration" value="${data.duration || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Room</label>
+                                <select name="room">
+                                    <option value="">Select Room</option>
+                                    <option value="Room 101" ${data.room === 'Room 101' ? 'selected' : ''}>Room 101</option>
+                                    <option value="Room 102" ${data.room === 'Room 102' ? 'selected' : ''}>Room 102</option>
+                                    <option value="Room 103" ${data.room === 'Room 103' ? 'selected' : ''}>Room 103</option>
+                                    <option value="Lab 1" ${data.room === 'Lab 1' ? 'selected' : ''}>Lab 1</option>
+                                    <option value="Lab 2" ${data.room === 'Lab 2' ? 'selected' : ''}>Lab 2</option>
+                                    <option value="Lab 3" ${data.room === 'Lab 3' ? 'selected' : ''}>Lab 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" name="subject" value="${data.subject || ''}">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Update Announcement</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

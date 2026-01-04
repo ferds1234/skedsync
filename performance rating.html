@@ -1,0 +1,3229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Rating System with AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All your CSS styles remain exactly the same */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --border-color: #ddd;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .tab-container {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 16px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background-color: var(--light-color);
+        }
+        
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .card h2, .card h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .rating-scale {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .rating-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .rating-option:hover {
+            background-color: var(--light-color);
+        }
+        
+        .rating-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .rating-option input {
+            display: none;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .analytics-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+        
+        .analytics-controls .form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--primary-color);
+        }
+        
+        .stat-card h4 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        
+        .stat-detail {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .chart-title {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .student-records {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .record-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.3s;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .record-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+        
+        .record-score {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .record-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .record-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .record-label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .record-value {
+            color: var(--primary-color);
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .badge-success {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: var(--success-color);
+        }
+        
+        .badge-warning {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .badge-danger {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .badge-info {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--primary-color);
+        }
+        
+        .excellence-section, .improvement-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: var(--light-color);
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        tr:hover {
+            background-color: rgba(236, 240, 241, 0.5);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        .result-title {
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .result-score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .sentiment-analysis {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .sentiment-analysis.positive {
+            background-color: rgba(39, 174, 96, 0.1);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .sentiment-analysis.negative {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .sentiment-analysis.neutral {
+            background-color: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .ai-suggestions {
+            background-color: rgba(52, 152, 219, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .suggestion-item {
+            padding: 10px;
+            margin: 10px 0;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .suggestion-item:hover {
+            background-color: var(--light-color);
+            transform: translateX(5px);
+        }
+        
+        .popup-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .performance-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 200px;
+            gap: 10px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .chart-bar {
+            flex: 1;
+            background-color: var(--primary-color);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        
+        .chart-bar-value {
+            position: absolute;
+            top: -25px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        .chart-bar-label {
+            padding: 5px;
+            font-size: 0.8rem;
+            text-align: center;
+            color: white;
+        }
+        
+        .trend-indicator {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .trend-up {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .trend-neutral {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .records-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-excellent {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+        
+        .status-good {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+        
+        .status-average {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(243, 156, 18, 0.3);
+        }
+        
+        .status-needs-improvement {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .analytics-controls {
+                flex-direction: column;
+            }
+            
+            .student-records {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Student Performance Rating System with AI</h1>
+            <p>Teacher evaluation of student performance with AI analysis and reporting</p>
+        </header>
+
+        <div class="tab-container">
+            <div class="tab active" data-tab="evaluation">Evaluation Form</div>
+            <div class="tab" data-tab="report">Student Reports</div>
+            <div class="tab" data-tab="records">Student Records</div>
+            <div class="tab" data-tab="analytics">Analytics Dashboard</div>
+        </div>
+
+        <!-- Evaluation Tab -->
+        <div id="evaluation-tab" class="tab-content active">
+            <div class="card">
+                <h2>Student Information</h2>
+                <div class="form-group">
+                    <label for="studentName">Student Name</label>
+                    <input type="text" id="studentName" placeholder="Enter student name">
+                </div>
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="Enter student ID">
+                </div>
+                <div class="form-group">
+                    <label for="gradeClass">Courses/Year</label>
+                    <select id="gradeClass">
+                        <option value="">Select Courses/Year</option>
+                        <option value="Grade 7">Grade 7</option>
+                        <option value="Grade 8">Grade 8</option>
+                        <option value="Grade 9">Grade 9</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="evaluationDate">Evaluation Date</label>
+                    <input type="date" id="evaluationDate">
+                </div>
+                <div class="form-group">
+                    <label for="teacherName">Teacher Name</label>
+                    <input type="text" id="teacherName" placeholder="Enter teacher name">
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject">
+                        <option value="">Select Subject</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="Filipino">Filipino</option>
+                        <option value="Araling Panlipunan">Araling Panlipunan</option>
+                        <option value="MAPEH">MAPEH</option>
+                        <option value="Edukasyon sa Pagpapakatao (EsP)">Edukasyon sa Pagpapakatao (EsP)</option>
+                        <option value="Technology and Livelihood Education (TLE)">Technology and Livelihood Education (TLE)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Student Performance Evaluation</h2>
+                <div class="form-group">
+                    <label>Academic Performance</label>
+                    <p>Evaluates the student's understanding of subject matter and academic achievement</p>
+                    <div class="rating-scale" id="academicScale">
+                        <label class="rating-option">
+                            <input type="radio" name="academic" value="1"> 1 (Poor)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="academic" value="2"> 2 (Needs Improvement)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="academic" value="3"> 3 (Meets Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="academic" value="4"> 4 (Exceeds Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="academic" value="5"> 5 (Outstanding)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Class Participation</label>
+                    <p>Assesses the student's engagement and contribution in class</p>
+                    <div class="rating-scale" id="participationScale">
+                        <label class="rating-option">
+                            <input type="radio" name="participation" value="1"> 1 (Poor)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="participation" value="2"> 2 (Needs Improvement)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="participation" value="3"> 3 (Meets Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="participation" value="4"> 4 (Exceeds Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="participation" value="5"> 5 (Outstanding)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Homework Completion</label>
+                    <p>Evaluates consistency and quality of homework submissions</p>
+                    <div class="rating-scale" id="homeworkScale">
+                        <label class="rating-option">
+                            <input type="radio" name="homework" value="1"> 1 (Poor)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="homework" value="2"> 2 (Needs Improvement)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="homework" value="3"> 3 (Meets Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="homework" value="4"> 4 (Exceeds Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="homework" value="5"> 5 (Outstanding)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Behavior</label>
+                    <p>Assesses classroom conduct and attitude toward learning</p>
+                    <div class="rating-scale" id="behaviorScale">
+                        <label class="rating-option">
+                            <input type="radio" name="behavior" value="1"> 1 (Poor)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="behavior" value="2"> 2 (Needs Improvement)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="behavior" value="3"> 3 (Meets Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="behavior" value="4"> 4 (Exceeds Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="behavior" value="5"> 5 (Outstanding)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Collaboration Skills</label>
+                    <p>Evaluates ability to work well with peers in group activities</p>
+                    <div class="rating-scale" id="collaborationScale">
+                        <label class="rating-option">
+                            <input type="radio" name="collaboration" value="1"> 1 (Poor)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="collaboration" value="2"> 2 (Needs Improvement)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="collaboration" value="3"> 3 (Meets Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="collaboration" value="4"> 4 (Exceeds Expectations)
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="collaboration" value="5"> 5 (Outstanding)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="strengths">Student Strengths</label>
+                    <textarea id="strengths" placeholder="Describe the student's strengths..."></textarea>
+                    <div id="strengthsSuggestions" class="ai-suggestions hidden">
+                        <h4>AI Suggestions for Strengths</h4>
+                        <div id="strengthsSuggestionsList"></div>
+                    </div>
+                    <button id="generateStrengthsBtn" class="btn" style="margin-top: 10px; padding: 8px 16px;">Generate AI Suggestions</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="improvements">Areas for Improvement</label>
+                    <textarea id="improvements" placeholder="Suggest areas where the student can improve..."></textarea>
+                    <div id="improvementsSuggestions" class="ai-suggestions hidden">
+                        <h4>AI Suggestions for Improvements</h4>
+                        <div id="improvementsSuggestionsList"></div>
+                    </div>
+                    <button id="generateImprovementsBtn" class="btn" style="margin-top: 10px; padding: 8px 16px;">Generate AI Suggestions</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="comments">Additional Comments</label>
+                    <textarea id="comments" placeholder="Provide any additional feedback..."></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button id="submitBtn" class="btn btn-success">Submit Evaluation</button>
+                    <button id="resetBtn" class="btn btn-danger">Reset Form</button>
+                    <button id="autoFillBtn" class="btn btn-warning">AI Auto-Fill</button>
+                </div>
+            </div>
+
+            <div id="resultContainer" class="result-container">
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 class="result-title">Student Performance Evaluation Result</h2>
+                        <div class="result-score" id="overallScore">0.0</div>
+                    </div>
+
+                    <div class="result-details">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Grade/Class</th>
+                                    <th>Evaluation Date</th>
+                                    <th>Teacher</th>
+                                    <th>Subject</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="resultStudentName">-</td>
+                                    <td id="resultGradeClass">-</td>
+                                    <td id="resultEvaluationDate">-</td>
+                                    <td id="resultTeacher">-</td>
+                                    <td id="resultSubject">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Rating</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ratingDetails">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="sentimentAnalysis" class="sentiment-analysis hidden">
+                        <h3>Feedback Sentiment Analysis</h3>
+                        <p id="sentimentResult">Analyzing comments...</p>
+                        <p class="sentiment-score" id="sentimentScore">Sentiment score: 0</p>
+                    </div>
+
+                    <div id="aiRecommendations" class="ai-suggestions hidden">
+                        <h3>AI Recommendations</h3>
+                        <div id="aiRecommendationsList"></div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button id="exportWordBtn" class="btn btn-primary">Save to student report</button>
+                        <button id="newEvaluationBtn" class="btn btn-warning">New Evaluation</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Tab -->
+        <div id="report-tab" class="tab-content">
+            <div class="card">
+                <h2>Student Evaluation Report</h2>
+                <div class="form-group">
+                    <label for="reportStudentId">Search Student by ID</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="reportStudentId" placeholder="Enter student ID">
+                        <button id="searchStudentBtn" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+
+                <div id="studentReportResults" style="display: none;">
+                    <h3>Evaluation History for <span id="reportStudentName"></span> (ID: <span id="reportStudentIdDisplay"></span>)</h3>
+                    <p>Total Evaluations: <span id="totalEvaluations">0</span></p>
+                    
+                    <div class="performance-chart" id="performanceChart">
+                        <!-- Chart bars will be added dynamically -->
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Teacher</th>
+                                <th>Overall Score</th>
+                                <th>Trend</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evaluationHistory">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW STUDENT RECORDS TAB -->
+        <div id="records-tab" class="tab-content">
+            <div class="card">
+                <h2>Student Records</h2>
+                <p class="stat-detail" style="margin-bottom: 20px;">View and manage student information with their grades and status</p>
+                
+                <div class="records-controls">
+                    <div class="form-group">
+                        <label for="recordsFilter">Filter By:</label>
+                        <select id="recordsFilter">
+                            <option value="all">All Students</option>
+                            <option value="grade">By Grade/Class</option>
+                            <option value="status">By Status</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="gradeFilterRecords" style="display: none;">
+                        <label for="gradeSelectRecords">Grade/Class:</label>
+                        <select id="gradeSelectRecords">
+                            <option value="">Select Grade/Class</option>
+                            <option value="Grade 7">Grade 7</option>
+                            <option value="Grade 8">Grade 8</option>
+                            <option value="Grade 9">Grade 9</option>
+                            <option value="Grade 10">Grade 10</option>
+                            <option value="Grade 11">Grade 11</option>
+                            <option value="Grade 12">Grade 12</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="statusFilterRecords" style="display: none;">
+                        <label for="statusSelectRecords">Status:</label>
+                        <select id="statusSelectRecords">
+                            <option value="">Select Status</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="average">Average</option>
+                            <option value="needs-improvement">Needs Improvement</option>
+                        </select>
+                    </div>
+                    
+                    <button id="applyRecordsFilterBtn" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filter
+                    </button>
+                    
+                    <div style="display: flex; gap: 10px; margin-left: auto;">
+                        <button id="addStudentBtn" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add Student
+                        </button>
+                        <button id="exportRecordsBtn" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Export Records
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total Students</h4>
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-detail">Registered in system</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Excellent Students</h4>
+                        <div class="stat-value" id="excellentStudentsCount">0</div>
+                        <div class="stat-detail">Score ≥ 4.5</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Average Grade</h4>
+                        <div class="stat-value" id="averageGrade">0.0</div>
+                        <div class="stat-detail">Overall average</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Needs Improvement</h4>
+                        <div class="stat-value" id="needsImprovementCount">0</div>
+                        <div class="stat-detail">Score ≤ 2.5</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Student Records List</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Grade/Class</th>
+                            <th>Average Score</th>
+                            <th>Status</th>
+                            <th>Last Evaluation</th>
+                            <th>Evaluations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentRecordsList">
+                        <!-- Student records will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h3>Grade Distribution</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>By Grade Level</h4>
+                        <div id="gradeDistribution">
+                            <!-- Grade distribution will be populated here -->
+                        </div>
+                    </div>
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>By Status</h4>
+                        <div id="statusDistribution">
+                            <!-- Status distribution will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="card">
+                <h2>Analytics Dashboard</h2>
+                
+                <div class="analytics-controls">
+                    <div class="form-group">
+                        <label for="analyticsFilter">Filter By:</label>
+                        <select id="analyticsFilter">
+                            <option value="all">All Students</option>
+                            <option value="grade">By Grade/Class</option>
+                            <option value="subject">By Subject</option>
+                            <option value="teacher">By Teacher</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="gradeFilterGroup" style="display: none;">
+                        <label for="gradeFilter">Grade/Class:</label>
+                        <select id="gradeFilter">
+                            <option value="">Select Grade/Class</option>
+                            <option value="Grade 7">Grade 7</option>
+                            <option value="Grade 8">Grade 8</option>
+                            <option value="Grade 9">Grade 9</option>
+                            <option value="Grade 10">Grade 10</option>
+                            <option value="Grade 11">Grade 11</option>
+                            <option value="Grade 12">Grade 12</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="subjectFilterGroup" style="display: none;">
+                        <label for="subjectFilter">Subject:</label>
+                        <select id="subjectFilter">
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="teacherFilterGroup" style="display: none;">
+                        <label for="teacherFilter">Teacher:</label>
+                        <select id="teacherFilter">
+                            <option value="">Select Teacher</option>
+                        </select>
+                    </div>
+                    
+                    <button id="applyFilterBtn" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filter
+                    </button>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="saveAnalyticsBtn" class="btn btn-success">
+                        <i class="fas fa-download"></i> Save Analytics Data
+                    </button>
+                    <button id="printAnalyticsBtn" class="btn btn-primary">
+                        <i class="fas fa-print"></i> Print Dashboard
+                    </button>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Average Score</h4>
+                    <div class="stat-value" id="avgScore">0.0</div>
+                    <div class="stat-detail">Across all evaluations</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Total Evaluations</h4>
+                    <div class="stat-value" id="totalEvals">0</div>
+                    <div class="stat-detail">Student assessments</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Top Performing Student</h4>
+                    <div class="stat-value" id="topStudentScore">0.0</div>
+                    <div class="stat-detail" id="topStudent">-</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Most Improved</h4>
+                    <div class="stat-value" id="improvementAmount">0.0</div>
+                    <div class="stat-detail" id="mostImprovedStudent">-</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">
+                    <span>Performance Trends</span>
+                </div>
+                <canvas id="performanceTrendChart" height="300"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">
+                    <span>Category Breakdown</span>
+                </div>
+                <canvas id="categoryBreakdownChart" height="300"></canvas>
+            </div>
+            
+            <div class="card">
+                <h3>Student Records</h3>
+                <div class="student-records" id="studentRecords">
+                    <!-- Student records will be populated here -->
+                </div>
+            </div>
+            
+            <div class="excellence-section">
+                <div class="section-header">
+                    <h3 class="section-title">Students with Excellence</h3>
+                    <span class="badge badge-success" id="excellenceCount">0 Students</span>
+                </div>
+                <div id="excellenceStudents">
+                    <!-- Excellence students will be populated here -->
+                </div>
+            </div>
+            
+            <div class="improvement-section">
+                <div class="section-header">
+                    <h3 class="section-title">Students with Improvement</h3>
+                    <span class="badge badge-warning" id="improvementCount">0 Students</span>
+                </div>
+                <div id="improvementStudents">
+                    <!-- Improvement students will be populated here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Recent Evaluations</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Grade</th>
+                            <th>Subject</th>
+                            <th>Teacher</th>
+                            <th>Score</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentEvaluations">
+                        <!-- Recent evaluations will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="successPopup" class="popup-notification">
+        Evaluation submitted successfully!
+    </div>
+
+    <!-- Include required libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Local storage key for evaluations
+        const STORAGE_KEY = 'studentEvaluations';
+        const STUDENTS_KEY = 'studentRecords';
+        
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
+        
+        function initApp() {
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('evaluationDate').value = today;
+            
+            // Initialize tab functionality
+            setupTabs();
+            
+            // Initialize rating scale interactions
+            setupRatingScales();
+            
+            // Setup form buttons
+            setupFormButtons();
+            
+            // Initialize report functionality
+            setupReportTab();
+            
+            // Initialize student records tab
+            setupStudentRecordsTab();
+            
+            // Initialize analytics tab
+            setupAnalyticsTab();
+            
+            // Load any existing evaluations
+            updateAnalyticsDashboard();
+            updateStudentRecords();
+        }
+        
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab') + '-tab';
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Update analytics when tab is clicked
+                    if (tabId === 'analytics-tab') {
+                        updateAnalyticsDashboard();
+                    } else if (tabId === 'records-tab') {
+                        updateStudentRecords();
+                    }
+                });
+            });
+        }
+        
+        function setupRatingScales() {
+            const ratingScales = document.querySelectorAll('.rating-scale');
+            ratingScales.forEach(scale => {
+                const options = scale.querySelectorAll('.rating-option');
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        // Remove selected class from all options in this scale
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        
+                        // Add selected class to clicked option
+                        this.classList.add('selected');
+                        
+                        // Check the radio input
+                        const radio = this.querySelector('input');
+                        radio.checked = true;
+                    });
+                });
+            });
+        }
+        
+        function setupFormButtons() {
+            // Reset button
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+                    resetForm();
+                }
+            });
+            
+            // Submit button
+            document.getElementById('submitBtn').addEventListener('click', function() {
+                if (validateForm()) {
+                    saveEvaluation();
+                    calculateResults();
+                    analyzeSentiment();
+                    generateAIRecommendations();
+                    document.getElementById('resultContainer').style.display = 'block';
+                    window.scrollTo({ top: document.getElementById('resultContainer').offsetTop, behavior: 'smooth' });
+                    
+                    // Show success popup
+                    showSuccessPopup();
+                    
+                    // Update analytics dashboard
+                    updateAnalyticsDashboard();
+                    updateStudentRecords();
+                }
+            });
+            
+            // New Evaluation button
+            document.getElementById('newEvaluationBtn').addEventListener('click', function() {
+                resetForm();
+                document.getElementById('resultContainer').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Export to Word button
+            document.getElementById('exportWordBtn').addEventListener('click', exportToWord);
+            
+            // AI suggestion buttons
+            document.getElementById('generateStrengthsBtn').addEventListener('click', function() {
+                generateAISuggestions('strengths');
+            });
+            
+            document.getElementById('generateImprovementsBtn').addEventListener('click', function() {
+                generateAISuggestions('improvements');
+            });
+            
+            // AI Auto-Fill button
+            document.getElementById('autoFillBtn').addEventListener('click', autoFillWithAI);
+        }
+        
+        function setupReportTab() {
+            document.getElementById('searchStudentBtn').addEventListener('click', function() {
+                const studentId = document.getElementById('reportStudentId').value.trim();
+                if (studentId) {
+                    displayStudentReport(studentId);
+                } else {
+                    alert('Please enter a student ID');
+                }
+            });
+        }
+        
+        function setupStudentRecordsTab() {
+            // Filter change handler
+            document.getElementById('recordsFilter').addEventListener('change', function() {
+                const filterType = this.value;
+                
+                // Hide all filter groups first
+                document.getElementById('gradeFilterRecords').style.display = 'none';
+                document.getElementById('statusFilterRecords').style.display = 'none';
+                
+                // Show the selected filter group
+                if (filterType === 'grade') {
+                    document.getElementById('gradeFilterRecords').style.display = 'block';
+                } else if (filterType === 'status') {
+                    document.getElementById('statusFilterRecords').style.display = 'block';
+                }
+            });
+            
+            // Apply filter button
+            document.getElementById('applyRecordsFilterBtn').addEventListener('click', updateStudentRecords);
+            
+            // Add student button
+            document.getElementById('addStudentBtn').addEventListener('click', showAddStudentModal);
+            
+            // Export records button
+            document.getElementById('exportRecordsBtn').addEventListener('click', exportStudentRecords);
+        }
+        
+        function setupAnalyticsTab() {
+            // Filter change handler
+            document.getElementById('analyticsFilter').addEventListener('change', function() {
+                const filterType = this.value;
+                
+                // Hide all filter groups first
+                document.getElementById('gradeFilterGroup').style.display = 'none';
+                document.getElementById('subjectFilterGroup').style.display = 'none';
+                document.getElementById('teacherFilterGroup').style.display = 'none';
+                
+                // Show the selected filter group
+                if (filterType === 'grade') {
+                    document.getElementById('gradeFilterGroup').style.display = 'block';
+                } else if (filterType === 'subject') {
+                    document.getElementById('subjectFilterGroup').style.display = 'block';
+                    populateSubjectFilter();
+                } else if (filterType === 'teacher') {
+                    document.getElementById('teacherFilterGroup').style.display = 'block';
+                    populateTeacherFilter();
+                }
+            });
+            
+            // Apply filter button
+            document.getElementById('applyFilterBtn').addEventListener('click', updateAnalyticsDashboard);
+            
+            // Save analytics button
+            document.getElementById('saveAnalyticsBtn').addEventListener('click', saveAnalyticsData);
+            
+            // Print analytics button
+            document.getElementById('printAnalyticsBtn').addEventListener('click', function() {
+                window.print();
+            });
+        }
+        
+        function populateSubjectFilter() {
+            const evaluations = getEvaluations();
+            const subjects = new Set();
+            
+            evaluations.forEach(eval => {
+                if (eval.subject) {
+                    subjects.add(eval.subject);
+                }
+            });
+            
+            const select = document.getElementById('subjectFilter');
+            select.innerHTML = '<option value="">Select Subject</option>';
+            
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                select.appendChild(option);
+            });
+        }
+        
+        function populateTeacherFilter() {
+            const evaluations = getEvaluations();
+            const teachers = new Set();
+            
+            evaluations.forEach(eval => {
+                if (eval.teacherName) {
+                    teachers.add(eval.teacherName);
+                }
+            });
+            
+            const select = document.getElementById('teacherFilter');
+            select.innerHTML = '<option value="">Select Teacher</option>';
+            
+            teachers.forEach(teacher => {
+                const option = document.createElement('option');
+                option.value = teacher;
+                option.textContent = teacher;
+                select.appendChild(option);
+            });
+        }
+        
+        function updateAnalyticsDashboard() {
+            const filterType = document.getElementById('analyticsFilter').value;
+            let filteredEvaluations = getEvaluations();
+            
+            if (filterType === 'grade') {
+                const grade = document.getElementById('gradeFilter').value;
+                if (grade) {
+                    filteredEvaluations = filteredEvaluations.filter(e => e.gradeClass === grade);
+                }
+            } else if (filterType === 'subject') {
+                const subject = document.getElementById('subjectFilter').value;
+                if (subject) {
+                    filteredEvaluations = filteredEvaluations.filter(e => e.subject === subject);
+                }
+            } else if (filterType === 'teacher') {
+                const teacher = document.getElementById('teacherFilter').value;
+                if (teacher) {
+                    filteredEvaluations = filteredEvaluations.filter(e => e.teacherName === teacher);
+                }
+            }
+            
+            displayAnalyticsData(filteredEvaluations);
+        }
+        
+        function updateStudentRecords() {
+            const filterType = document.getElementById('recordsFilter').value;
+            let students = getStudentRecords();
+            const evaluations = getEvaluations();
+            
+            // Calculate average scores and status for each student
+            students = students.map(student => {
+                const studentEvals = evaluations.filter(e => e.studentId === student.id);
+                const totalScore = studentEvals.reduce((sum, eval) => sum + eval.overallScore, 0);
+                const avgScore = studentEvals.length > 0 ? totalScore / studentEvals.length : 0;
+                
+                // Determine status based on average score
+                let status = 'average';
+                let statusClass = 'status-average';
+                
+                if (avgScore >= 4.5) {
+                    status = 'excellent';
+                    statusClass = 'status-excellent';
+                } else if (avgScore >= 3.5) {
+                    status = 'good';
+                    statusClass = 'status-good';
+                } else if (avgScore <= 2.5) {
+                    status = 'needs-improvement';
+                    statusClass = 'status-needs-improvement';
+                }
+                
+                return {
+                    ...student,
+                    averageScore: avgScore,
+                    status: status,
+                    statusClass: statusClass,
+                    evaluationCount: studentEvals.length,
+                    lastEvaluation: studentEvals.length > 0 ? 
+                        new Date(studentEvals[studentEvals.length - 1].evaluationDate).toLocaleDateString() : 'No evaluations'
+                };
+            });
+            
+            // Apply filters
+            if (filterType === 'grade') {
+                const grade = document.getElementById('gradeSelectRecords').value;
+                if (grade) {
+                    students = students.filter(s => s.grade === grade);
+                }
+            } else if (filterType === 'status') {
+                const status = document.getElementById('statusSelectRecords').value;
+                if (status) {
+                    students = students.filter(s => s.status === status);
+                }
+            }
+            
+            displayStudentRecords(students);
+        }
+        
+        function displayAnalyticsData(evaluations) {
+            console.log("Displaying analytics for", evaluations.length, "evaluations");
+            
+            // Update basic stats
+            document.getElementById('totalEvals').textContent = evaluations.length;
+            
+            if (evaluations.length === 0) {
+                document.getElementById('avgScore').textContent = '0.0';
+                document.getElementById('topStudent').textContent = '-';
+                document.getElementById('topStudentScore').textContent = '0.0';
+                document.getElementById('mostImprovedStudent').textContent = '-';
+                document.getElementById('improvementAmount').textContent = '0.0';
+                
+                // Clear charts and tables
+                clearChartsAndTables();
+                return;
+            }
+            
+            // Calculate average score
+            const totalScore = evaluations.reduce((sum, eval) => sum + eval.overallScore, 0);
+            const avgScore = totalScore / evaluations.length;
+            document.getElementById('avgScore').textContent = avgScore.toFixed(1);
+            
+            // Find top performing student
+            const studentAverages = calculateStudentAverages(evaluations);
+            let topStudent = null;
+            let topAvgScore = 0;
+            
+            for (const studentId in studentAverages) {
+                if (studentAverages[studentId].avgScore > topAvgScore) {
+                    topAvgScore = studentAverages[studentId].avgScore;
+                    topStudent = studentAverages[studentId];
+                }
+            }
+            
+            if (topStudent) {
+                document.getElementById('topStudent').textContent = topStudent.name;
+                document.getElementById('topStudentScore').textContent = topAvgScore.toFixed(1);
+            }
+            
+            // Find most improved student
+            const mostImproved = findMostImprovedStudent(evaluations);
+            if (mostImproved) {
+                document.getElementById('mostImprovedStudent').textContent = mostImproved.name;
+                document.getElementById('improvementAmount').textContent = mostImproved.improvement.toFixed(1);
+            }
+            
+            // Update charts
+            updatePerformanceTrendChart(evaluations);
+            updateCategoryBreakdownChart(evaluations);
+            
+            // Update student records
+            updateAnalyticsStudentRecords(evaluations);
+            
+            // Update excellence and improvement sections
+            updateExcellenceAndImprovement(evaluations);
+            
+            // Update recent evaluations table
+            updateRecentEvaluationsTable(evaluations);
+        }
+        
+        function displayStudentRecords(students) {
+            // Update statistics
+            const totalStudents = students.length;
+            const excellentStudents = students.filter(s => s.status === 'excellent').length;
+            const needsImprovementStudents = students.filter(s => s.status === 'needs-improvement').length;
+            const averageGrade = students.length > 0 ? 
+                (students.reduce((sum, student) => sum + student.averageScore, 0) / students.length).toFixed(1) : '0.0';
+            
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('excellentStudentsCount').textContent = excellentStudents;
+            document.getElementById('needsImprovementCount').textContent = needsImprovementStudents;
+            document.getElementById('averageGrade').textContent = averageGrade;
+            
+            // Update student records table
+            const tableBody = document.getElementById('studentRecordsList');
+            tableBody.innerHTML = '';
+            
+            if (students.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            <p style="font-size: 1.2rem; color: #666; margin-bottom: 10px;">No student records found</p>
+                            <button id="addFirstStudentBtn" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Add First Student
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('addFirstStudentBtn').addEventListener('click', showAddStudentModal);
+                return;
+            }
+            
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                
+                // Student ID
+                const idCell = document.createElement('td');
+                idCell.textContent = student.id;
+                row.appendChild(idCell);
+                
+                // Student Name
+                const nameCell = document.createElement('td');
+                nameCell.textContent = student.name;
+                row.appendChild(nameCell);
+                
+                // Grade/Class
+                const gradeCell = document.createElement('td');
+                gradeCell.textContent = student.grade;
+                row.appendChild(gradeCell);
+                
+                // Average Score
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = student.averageScore.toFixed(1);
+                scoreCell.style.fontWeight = 'bold';
+                if (student.averageScore >= 4.5) {
+                    scoreCell.style.color = '#27ae60';
+                } else if (student.averageScore >= 3.5) {
+                    scoreCell.style.color = '#3498db';
+                } else if (student.averageScore <= 2.5) {
+                    scoreCell.style.color = '#e74c3c';
+                }
+                row.appendChild(scoreCell);
+                
+                // Status
+                const statusCell = document.createElement('td');
+                const statusBadge = document.createElement('span');
+                statusBadge.className = `status-badge ${student.statusClass}`;
+                statusBadge.textContent = student.status.charAt(0).toUpperCase() + student.status.slice(1).replace('-', ' ');
+                statusCell.appendChild(statusBadge);
+                row.appendChild(statusCell);
+                
+                // Last Evaluation
+                const lastEvalCell = document.createElement('td');
+                lastEvalCell.textContent = student.lastEvaluation;
+                row.appendChild(lastEvalCell);
+                
+                // Evaluations Count
+                const evalCountCell = document.createElement('td');
+                evalCountCell.textContent = student.evaluationCount;
+                row.appendChild(evalCountCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const actionBtnGroup = document.createElement('div');
+                actionBtnGroup.style.display = 'flex';
+                actionBtnGroup.style.gap = '5px';
+                
+                // View button
+                const viewBtn = document.createElement('button');
+                viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                viewBtn.className = 'btn btn-primary';
+                viewBtn.style.padding = '5px 10px';
+                viewBtn.title = 'View Student';
+                viewBtn.addEventListener('click', function() {
+                    displayStudentReport(student.id);
+                    // Switch to report tab
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="report"]').classList.add('active');
+                    document.getElementById('report-tab').classList.add('active');
+                });
+                actionBtnGroup.appendChild(viewBtn);
+                
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.className = 'btn btn-warning';
+                editBtn.style.padding = '5px 10px';
+                editBtn.title = 'Edit Student';
+                editBtn.addEventListener('click', function() {
+                    editStudent(student.id);
+                });
+                actionBtnGroup.appendChild(editBtn);
+                
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.className = 'btn btn-danger';
+                deleteBtn.style.padding = '5px 10px';
+                deleteBtn.title = 'Delete Student';
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm(`Are you sure you want to delete ${student.name}? This will also delete all their evaluations.`)) {
+                        deleteStudentRecord(student.id);
+                    }
+                });
+                actionBtnGroup.appendChild(deleteBtn);
+                
+                actionsCell.appendChild(actionBtnGroup);
+                row.appendChild(actionsCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Update grade distribution
+            updateGradeDistribution(students);
+            
+            // Update status distribution
+            updateStatusDistribution(students);
+        }
+        
+        function updateGradeDistribution(students) {
+            const distribution = {};
+            students.forEach(student => {
+                if (!distribution[student.grade]) {
+                    distribution[student.grade] = 0;
+                }
+                distribution[student.grade]++;
+            });
+            
+            const container = document.getElementById('gradeDistribution');
+            container.innerHTML = '';
+            
+            for (const grade in distribution) {
+                const count = distribution[grade];
+                const percentage = Math.round((count / students.length) * 100);
+                
+                const barContainer = document.createElement('div');
+                barContainer.style.marginBottom = '10px';
+                
+                const labelRow = document.createElement('div');
+                labelRow.style.display = 'flex';
+                labelRow.style.justifyContent = 'space-between';
+                labelRow.style.marginBottom = '5px';
+                
+                const gradeLabel = document.createElement('span');
+                gradeLabel.textContent = grade;
+                gradeLabel.style.fontWeight = '600';
+                
+                const countLabel = document.createElement('span');
+                countLabel.textContent = `${count} students (${percentage}%)`;
+                countLabel.style.color = '#666';
+                
+                labelRow.appendChild(gradeLabel);
+                labelRow.appendChild(countLabel);
+                
+                const bar = document.createElement('div');
+                bar.style.height = '20px';
+                bar.style.backgroundColor = '#ecf0f1';
+                bar.style.borderRadius = '10px';
+                bar.style.overflow = 'hidden';
+                
+                const fill = document.createElement('div');
+                fill.style.height = '100%';
+                fill.style.width = `${percentage}%`;
+                fill.style.backgroundColor = '#3498db';
+                fill.style.borderRadius = '10px';
+                
+                bar.appendChild(fill);
+                
+                barContainer.appendChild(labelRow);
+                barContainer.appendChild(bar);
+                
+                container.appendChild(barContainer);
+            }
+        }
+        
+        function updateStatusDistribution(students) {
+            const statusCounts = {
+                'excellent': 0,
+                'good': 0,
+                'average': 0,
+                'needs-improvement': 0
+            };
+            
+            students.forEach(student => {
+                if (statusCounts[student.status] !== undefined) {
+                    statusCounts[student.status]++;
+                }
+            });
+            
+            const container = document.getElementById('statusDistribution');
+            container.innerHTML = '';
+            
+            const statusColors = {
+                'excellent': '#27ae60',
+                'good': '#3498db',
+                'average': '#f39c12',
+                'needs-improvement': '#e74c3c'
+            };
+            
+            const statusLabels = {
+                'excellent': 'Excellent',
+                'good': 'Good',
+                'average': 'Average',
+                'needs-improvement': 'Needs Improvement'
+            };
+            
+            for (const status in statusCounts) {
+                const count = statusCounts[status];
+                if (count === 0) continue;
+                
+                const percentage = Math.round((count / students.length) * 100);
+                
+                const statusItem = document.createElement('div');
+                statusItem.style.display = 'flex';
+                statusItem.style.alignItems = 'center';
+                statusItem.style.marginBottom = '10px';
+                statusItem.style.padding = '10px';
+                statusItem.style.backgroundColor = 'white';
+                statusItem.style.borderRadius = '8px';
+                statusItem.style.borderLeft = `4px solid ${statusColors[status]}`;
+                
+                const colorIndicator = document.createElement('div');
+                colorIndicator.style.width = '12px';
+                colorIndicator.style.height = '12px';
+                colorIndicator.style.borderRadius = '50%';
+                colorIndicator.style.backgroundColor = statusColors[status];
+                colorIndicator.style.marginRight = '10px';
+                
+                const textContainer = document.createElement('div');
+                textContainer.style.flex = '1';
+                
+                const statusName = document.createElement('div');
+                statusName.textContent = statusLabels[status];
+                statusName.style.fontWeight = '600';
+                
+                const statusCount = document.createElement('div');
+                statusCount.textContent = `${count} students (${percentage}%)`;
+                statusCount.style.fontSize = '0.9rem';
+                statusCount.style.color = '#666';
+                
+                textContainer.appendChild(statusName);
+                textContainer.appendChild(statusCount);
+                
+                statusItem.appendChild(colorIndicator);
+                statusItem.appendChild(textContainer);
+                
+                container.appendChild(statusItem);
+            }
+        }
+        
+        function showAddStudentModal() {
+            const studentName = prompt('Enter student name:');
+            if (!studentName) return;
+            
+            const studentId = prompt('Enter student ID:');
+            if (!studentId) return;
+            
+            const grade = prompt('Enter student grade (Grade 7, Grade 8, etc.):');
+            if (!grade) return;
+            
+            // Check if student already exists
+            const students = getStudentRecords();
+            if (students.some(s => s.id === studentId)) {
+                alert('Student with this ID already exists!');
+                return;
+            }
+            
+            // Add new student
+            const newStudent = {
+                id: studentId,
+                name: studentName,
+                grade: grade,
+                dateAdded: new Date().toISOString()
+            };
+            
+            students.push(newStudent);
+            localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+            
+            alert('Student added successfully!');
+            updateStudentRecords();
+        }
+        
+        function editStudent(studentId) {
+            const students = getStudentRecords();
+            const studentIndex = students.findIndex(s => s.id === studentId);
+            
+            if (studentIndex === -1) {
+                alert('Student not found!');
+                return;
+            }
+            
+            const student = students[studentIndex];
+            
+            const newName = prompt('Enter new student name:', student.name);
+            if (!newName) return;
+            
+            const newGrade = prompt('Enter new student grade:', student.grade);
+            if (!newGrade) return;
+            
+            students[studentIndex] = {
+                ...student,
+                name: newName,
+                grade: newGrade
+            };
+            
+            localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+            alert('Student updated successfully!');
+            updateStudentRecords();
+        }
+        
+        function deleteStudentRecord(studentId) {
+            let students = getStudentRecords();
+            students = students.filter(s => s.id !== studentId);
+            localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+            
+            // Also delete evaluations for this student
+            let evaluations = getEvaluations();
+            evaluations = evaluations.filter(e => e.studentId !== studentId);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(evaluations));
+            
+            alert('Student and their evaluations deleted successfully!');
+            updateStudentRecords();
+            updateAnalyticsDashboard();
+        }
+        
+        function exportStudentRecords() {
+            const students = getStudentRecords();
+            const evaluations = getEvaluations();
+            
+            const studentData = students.map(student => {
+                const studentEvals = evaluations.filter(e => e.studentId === student.id);
+                const totalScore = studentEvals.reduce((sum, eval) => sum + eval.overallScore, 0);
+                const avgScore = studentEvals.length > 0 ? totalScore / studentEvals.length : 0;
+                
+                // Determine status based on average score
+                let status = 'average';
+                if (avgScore >= 4.5) status = 'excellent';
+                else if (avgScore >= 3.5) status = 'good';
+                else if (avgScore <= 2.5) status = 'needs-improvement';
+                
+                return {
+                    studentId: student.id,
+                    studentName: student.name,
+                    grade: student.grade,
+                    averageScore: avgScore.toFixed(1),
+                    status: status,
+                    evaluationCount: studentEvals.length,
+                    lastEvaluation: studentEvals.length > 0 ? 
+                        new Date(studentEvals[studentEvals.length - 1].evaluationDate).toLocaleDateString() : 'No evaluations'
+                };
+            });
+            
+            const dataStr = JSON.stringify(studentData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            // Create download link
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `student-records-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Student records exported successfully!');
+        }
+        
+        function getStudentRecords() {
+            const studentsJson = localStorage.getItem(STUDENTS_KEY);
+            if (!studentsJson) {
+                // Create sample students if none exist
+                const sampleStudents = createSampleStudents();
+                localStorage.setItem(STUDENTS_KEY, JSON.stringify(sampleStudents));
+                return sampleStudents;
+            }
+            
+            return JSON.parse(studentsJson);
+        }
+        
+        function createSampleStudents() {
+            return [
+                { id: "S1001", name: "John Smith", grade: "Grade 10", dateAdded: new Date().toISOString() },
+                { id: "S1002", name: "Maria Garcia", grade: "Grade 10", dateAdded: new Date().toISOString() },
+                { id: "S1003", name: "David Johnson", grade: "Grade 11", dateAdded: new Date().toISOString() },
+                { id: "S1004", name: "Sarah Williams", grade: "Grade 9", dateAdded: new Date().toISOString() },
+                { id: "S1005", name: "Michael Brown", grade: "Grade 12", dateAdded: new Date().toISOString() },
+                { id: "S1006", name: "Emily Davis", grade: "Grade 8", dateAdded: new Date().toISOString() },
+                { id: "S1007", name: "James Wilson", grade: "Grade 7", dateAdded: new Date().toISOString() },
+                { id: "S1008", name: "Lisa Martinez", grade: "Grade 11", dateAdded: new Date().toISOString() }
+            ];
+        }
+        
+        // VALIDATION AND FORM FUNCTIONS
+        function validateForm() {
+            const studentName = document.getElementById('studentName').value.trim();
+            const studentId = document.getElementById('studentId').value.trim();
+            const gradeClass = document.getElementById('gradeClass').value;
+            const teacherName = document.getElementById('teacherName').value.trim();
+            const subject = document.getElementById('subject').value;
+            
+            if (!studentName) {
+                alert('Please enter student name');
+                return false;
+            }
+            
+            if (!studentId) {
+                alert('Please enter student ID');
+                return false;
+            }
+            
+            if (!gradeClass) {
+                alert('Please select grade/class');
+                return false;
+            }
+            
+            if (!teacherName) {
+                alert('Please enter teacher name');
+                return false;
+            }
+            
+            if (!subject) {
+                alert('Please select subject');
+                return false;
+            }
+            
+            // Check if all ratings are selected
+            const categories = ['academic', 'participation', 'homework', 'behavior', 'collaboration'];
+            for (const category of categories) {
+                const rating = document.querySelector(`input[name="${category}"]:checked`);
+                if (!rating) {
+                    alert(`Please select a rating for ${category.replace(/^\w/, c => c.toUpperCase())}`);
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function saveEvaluation() {
+            // Collect form data
+            const evaluation = {
+                studentName: document.getElementById('studentName').value.trim(),
+                studentId: document.getElementById('studentId').value.trim(),
+                gradeClass: document.getElementById('gradeClass').value,
+                evaluationDate: document.getElementById('evaluationDate').value,
+                teacherName: document.getElementById('teacherName').value.trim(),
+                subject: document.getElementById('subject').value,
+                academic: parseInt(document.querySelector('input[name="academic"]:checked').value),
+                participation: parseInt(document.querySelector('input[name="participation"]:checked').value),
+                homework: parseInt(document.querySelector('input[name="homework"]:checked').value),
+                behavior: parseInt(document.querySelector('input[name="behavior"]:checked').value),
+                collaboration: parseInt(document.querySelector('input[name="collaboration"]:checked').value),
+                strengths: document.getElementById('strengths').value.trim(),
+                improvements: document.getElementById('improvements').value.trim(),
+                comments: document.getElementById('comments').value.trim(),
+                timestamp: new Date().toISOString()
+            };
+            
+            // Calculate overall score
+            const scores = [evaluation.academic, evaluation.participation, evaluation.homework, evaluation.behavior, evaluation.collaboration];
+            evaluation.overallScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+            
+            // Get existing evaluations
+            let evaluations = getEvaluations();
+            
+            // Add new evaluation
+            evaluations.push(evaluation);
+            
+            // Save to localStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(evaluations));
+            
+            // Add student to student records if not already there
+            addStudentToRecords(evaluation.studentId, evaluation.studentName, evaluation.gradeClass);
+            
+            return evaluation;
+        }
+        
+        function addStudentToRecords(studentId, studentName, grade) {
+            let students = getStudentRecords();
+            
+            // Check if student already exists
+            const existingStudent = students.find(s => s.id === studentId);
+            if (!existingStudent) {
+                students.push({
+                    id: studentId,
+                    name: studentName,
+                    grade: grade,
+                    dateAdded: new Date().toISOString()
+                });
+                localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+            }
+        }
+        
+        function calculateResults() {
+            const evaluation = saveEvaluation(); // This also saves the evaluation
+            
+            // Display results
+            document.getElementById('resultStudentName').textContent = evaluation.studentName;
+            document.getElementById('resultGradeClass').textContent = evaluation.gradeClass;
+            document.getElementById('resultEvaluationDate').textContent = evaluation.evaluationDate;
+            document.getElementById('resultTeacher').textContent = evaluation.teacherName;
+            document.getElementById('resultSubject').textContent = evaluation.subject;
+            document.getElementById('overallScore').textContent = evaluation.overallScore;
+            
+            // Populate rating details table
+            const ratingDetails = document.getElementById('ratingDetails');
+            ratingDetails.innerHTML = '';
+            
+            const categories = [
+                { name: 'Academic Performance', value: evaluation.academic },
+                { name: 'Class Participation', value: evaluation.participation },
+                { name: 'Homework Completion', value: evaluation.homework },
+                { name: 'Behavior', value: evaluation.behavior },
+                { name: 'Collaboration Skills', value: evaluation.collaboration }
+            ];
+            
+            categories.forEach(category => {
+                const row = document.createElement('tr');
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = category.name;
+                
+                const valueCell = document.createElement('td');
+                valueCell.textContent = category.value;
+                
+                const descCell = document.createElement('td');
+                descCell.textContent = getRatingDescription(category.value);
+                
+                row.appendChild(nameCell);
+                row.appendChild(valueCell);
+                row.appendChild(descCell);
+                
+                ratingDetails.appendChild(row);
+            });
+        }
+        
+        function getRatingDescription(rating) {
+            switch(rating) {
+                case 1: return 'Poor';
+                case 2: return 'Needs Improvement';
+                case 3: return 'Meets Expectations';
+                case 4: return 'Exceeds Expectations';
+                case 5: return 'Outstanding';
+                default: return 'Not Rated';
+            }
+        }
+        
+        function analyzeSentiment() {
+            const strengths = document.getElementById('strengths').value;
+            const improvements = document.getElementById('improvements').value;
+            const comments = document.getElementById('comments').value;
+            
+            const allText = strengths + ' ' + improvements + ' ' + comments;
+            
+            // Simple sentiment analysis based on keyword matching
+            let sentiment = 'neutral';
+            let sentimentScore = 0;
+            
+            const positiveWords = ['excellent', 'good', 'great', 'outstanding', 'improved', 'progress', 'well', 'strong', 'positive', 'exceeds', 'proud'];
+            const negativeWords = ['poor', 'weak', 'struggling', 'difficult', 'challenging', 'needs', 'improvement', 'concern', 'issue', 'problem', 'low'];
+            
+            const words = allText.toLowerCase().split(/\s+/);
+            
+            let positiveCount = 0;
+            let negativeCount = 0;
+            
+            words.forEach(word => {
+                if (positiveWords.some(pw => word.includes(pw))) positiveCount++;
+                if (negativeWords.some(nw => word.includes(nw))) negativeCount++;
+            });
+            
+            sentimentScore = positiveCount - negativeCount;
+            
+            if (sentimentScore > 2) sentiment = 'positive';
+            else if (sentimentScore < -2) sentiment = 'negative';
+            else sentiment = 'neutral';
+            
+            // Display sentiment analysis
+            const sentimentDiv = document.getElementById('sentimentAnalysis');
+            sentimentDiv.className = `sentiment-analysis ${sentiment}`;
+            sentimentDiv.classList.remove('hidden');
+            
+            document.getElementById('sentimentResult').textContent = 
+                sentiment === 'positive' ? 'Overall feedback is positive' :
+                sentiment === 'negative' ? 'Areas for improvement noted' :
+                'Feedback is balanced';
+            
+            document.getElementById('sentimentScore').textContent = `Sentiment score: ${sentimentScore}`;
+        }
+        
+        function generateAIRecommendations() {
+            const academic = parseInt(document.querySelector('input[name="academic"]:checked').value);
+            const participation = parseInt(document.querySelector('input[name="participation"]:checked').value);
+            const homework = parseInt(document.querySelector('input[name="homework"]:checked').value);
+            const behavior = parseInt(document.querySelector('input[name="behavior"]:checked').value);
+            const collaboration = parseInt(document.querySelector('input[name="collaboration"]:checked').value);
+            
+            const recommendationsList = document.getElementById('aiRecommendationsList');
+            recommendationsList.innerHTML = '';
+            
+            // AI recommendations based on scores
+            const recommendations = [];
+            
+            if (academic <= 2) {
+                recommendations.push({
+                    title: "Academic Support",
+                    description: "Consider additional tutoring or one-on-one sessions to improve understanding of subject matter."
+                });
+            }
+            
+            if (participation <= 2) {
+                recommendations.push({
+                    title: "Increase Participation",
+                    description: "Try calling on student more frequently or assign specific roles in group discussions."
+                });
+            }
+            
+            if (homework <= 2) {
+                recommendations.push({
+                    title: "Homework Monitoring",
+                    description: "Implement a homework tracking system and provide clearer deadlines."
+                });
+            }
+            
+            if (behavior <= 2) {
+                recommendations.push({
+                    title: "Behavior Management",
+                    description: "Consider a behavior improvement plan with clear expectations and positive reinforcement."
+                });
+            }
+            
+            if (collaboration <= 2) {
+                recommendations.push({
+                    title: "Collaboration Skills",
+                    description: "Assign specific roles in group projects and provide guidance on teamwork skills."
+                });
+            }
+            
+            // Add general recommendations based on overall score
+            const overallScore = (academic + participation + homework + behavior + collaboration) / 5;
+            
+            if (overallScore >= 4) {
+                recommendations.push({
+                    title: "Enrichment Opportunities",
+                    description: "Provide advanced materials or leadership opportunities to challenge the student further."
+                });
+            } else if (overallScore <= 2.5) {
+                recommendations.push({
+                    title: "Comprehensive Support Plan",
+                    description: "Develop a comprehensive support plan involving parents and school counselors."
+                });
+            }
+            
+            // Display recommendations
+            recommendations.forEach(rec => {
+                const recItem = document.createElement('div');
+                recItem.className = 'suggestion-item';
+                recItem.innerHTML = `
+                    <strong>${rec.title}</strong>
+                    <p style="margin-top: 5px; font-size: 0.9rem;">${rec.description}</p>
+                `;
+                recommendationsList.appendChild(recItem);
+            });
+            
+            document.getElementById('aiRecommendations').classList.remove('hidden');
+        }
+        
+        function generateAISuggestions(type) {
+            const suggestionsDiv = type === 'strengths' ? 
+                document.getElementById('strengthsSuggestions') : 
+                document.getElementById('improvementsSuggestions');
+                
+            const suggestionsList = type === 'strengths' ?
+                document.getElementById('strengthsSuggestionsList') :
+                document.getElementById('improvementsSuggestionsList');
+                
+            // Show the suggestions div
+            suggestionsDiv.classList.remove('hidden');
+            
+            // Get current ratings
+            const academic = parseInt(document.querySelector('input[name="academic"]:checked')?.value || 3);
+            const participation = parseInt(document.querySelector('input[name="participation"]:checked')?.value || 3);
+            const homework = parseInt(document.querySelector('input[name="homework"]:checked')?.value || 3);
+            const behavior = parseInt(document.querySelector('input[name="behavior"]:checked')?.value || 3);
+            const collaboration = parseInt(document.querySelector('input[name="collaboration"]:checked')?.value || 3);
+            
+            // Generate AI suggestions based on ratings
+            let suggestions = [];
+            
+            if (type === 'strengths') {
+                if (academic >= 4) {
+                    suggestions.push("Demonstrates strong understanding of subject matter and consistently achieves high academic results.");
+                }
+                if (participation >= 4) {
+                    suggestions.push("Actively participates in class discussions and contributes valuable insights.");
+                }
+                if (homework >= 4) {
+                    suggestions.push("Consistently submits high-quality homework on time and shows attention to detail.");
+                }
+                if (behavior >= 4) {
+                    suggestions.push("Exhibits excellent classroom behavior and maintains a positive attitude toward learning.");
+                }
+                if (collaboration >= 4) {
+                    suggestions.push("Works well with peers in group settings and demonstrates strong teamwork skills.");
+                }
+                
+                // Add generic strengths if no specific ones
+                if (suggestions.length === 0) {
+                    suggestions = [
+                        "Shows potential for growth with proper support and guidance.",
+                        "Demonstrates willingness to learn and improve when given clear instructions.",
+                        "Maintains consistent effort throughout the learning process."
+                    ];
+                }
+            } else {
+                if (academic <= 2) {
+                    suggestions.push("Could benefit from additional support in understanding core concepts.");
+                }
+                if (participation <= 2) {
+                    suggestions.push("Would benefit from increased participation in class discussions and activities.");
+                }
+                if (homework <= 2) {
+                    suggestions.push("Needs to improve consistency and quality of homework submissions.");
+                }
+                if (behavior <= 2) {
+                    suggestions.push("Would benefit from improved focus and classroom conduct.");
+                }
+                if (collaboration <= 2) {
+                    suggestions.push("Could work on developing better collaboration and teamwork skills.");
+                }
+                
+                // Add generic improvements if no specific ones
+                if (suggestions.length === 0) {
+                    suggestions = [
+                        "Consider setting specific, measurable goals for continued improvement.",
+                        "Regular review sessions could help reinforce learning and build confidence.",
+                        "Opportunities for practical application of concepts could enhance understanding."
+                    ];
+                }
+            }
+            
+            // Display suggestions
+            suggestionsList.innerHTML = '';
+            suggestions.forEach(suggestion => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.textContent = suggestion;
+                suggestionItem.addEventListener('click', function() {
+                    if (type === 'strengths') {
+                        document.getElementById('strengths').value = suggestion;
+                    } else {
+                        document.getElementById('improvements').value = suggestion;
+                    }
+                    suggestionsDiv.classList.add('hidden');
+                });
+                suggestionsList.appendChild(suggestionItem);
+            });
+        }
+        
+        function autoFillWithAI() {
+            // Fill with sample data for demonstration
+            const names = ["John Smith", "Maria Garcia", "David Johnson", "Sarah Williams", "Michael Brown"];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            
+            document.getElementById('studentName').value = randomName;
+            document.getElementById('studentId').value = "S" + (1000 + Math.floor(Math.random() * 900));
+            document.getElementById('gradeClass').value = ["Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"][Math.floor(Math.random() * 6)];
+            document.getElementById('teacherName').value = "Mr. Rodriguez";
+            document.getElementById('subject').value = ["Mathematics", "Science", "English", "Filipino"][Math.floor(Math.random() * 4)];
+            
+            // Select random ratings
+            const categories = ['academic', 'participation', 'homework', 'behavior', 'collaboration'];
+            categories.forEach(category => {
+                const randomRating = Math.floor(Math.random() * 5) + 1;
+                const radio = document.querySelector(`input[name="${category}"][value="${randomRating}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    radio.closest('.rating-option').classList.add('selected');
+                }
+            });
+            
+            // Fill text areas with sample content
+            document.getElementById('strengths').value = "Demonstrates good understanding of basic concepts. Shows willingness to participate in class activities.";
+            document.getElementById('improvements').value = "Could benefit from additional practice with more complex problems. Needs to improve consistency in homework submission.";
+            document.getElementById('comments').value = "Student shows potential for improvement with continued support and practice.";
+            
+            alert('Form auto-filled with sample data for demonstration.');
+        }
+        
+        function resetForm() {
+            // Clear all form fields
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentId').value = '';
+            document.getElementById('gradeClass').value = '';
+            document.getElementById('teacherName').value = '';
+            document.getElementById('subject').value = '';
+            
+            // Clear all ratings
+            const ratingOptions = document.querySelectorAll('.rating-option');
+            ratingOptions.forEach(option => {
+                option.classList.remove('selected');
+                const radio = option.querySelector('input');
+                radio.checked = false;
+            });
+            
+            // Clear text areas
+            document.getElementById('strengths').value = '';
+            document.getElementById('improvements').value = '';
+            document.getElementById('comments').value = '';
+            
+            // Hide suggestions
+            document.getElementById('strengthsSuggestions').classList.add('hidden');
+            document.getElementById('improvementsSuggestions').classList.add('hidden');
+            
+            // Hide results
+            document.getElementById('resultContainer').style.display = 'none';
+        }
+        
+        function showSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            popup.style.display = 'block';
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 3000);
+        }
+        
+        // REPORT FUNCTIONS
+        function displayStudentReport(studentId) {
+            const evaluations = getEvaluations();
+            const studentEvaluations = evaluations.filter(e => e.studentId === studentId);
+            
+            if (studentEvaluations.length === 0) {
+                alert('No evaluations found for this student ID');
+                return;
+            }
+            
+            // Display student info
+            const firstEval = studentEvaluations[0];
+            document.getElementById('reportStudentName').textContent = firstEval.studentName;
+            document.getElementById('reportStudentIdDisplay').textContent = studentId;
+            document.getElementById('totalEvaluations').textContent = studentEvaluations.length;
+            
+            // Show results section
+            document.getElementById('studentReportResults').style.display = 'block';
+            
+            // Sort evaluations by date
+            studentEvaluations.sort((a, b) => new Date(a.evaluationDate) - new Date(b.evaluationDate));
+            
+            // Update evaluation history table
+            const historyTable = document.getElementById('evaluationHistory');
+            historyTable.innerHTML = '';
+            
+            studentEvaluations.forEach((eval, index) => {
+                const row = document.createElement('tr');
+                
+                // Date
+                const dateCell = document.createElement('td');
+                dateCell.textContent = eval.evaluationDate;
+                
+                // Subject
+                const subjectCell = document.createElement('td');
+                subjectCell.textContent = eval.subject;
+                
+                // Teacher
+                const teacherCell = document.createElement('td');
+                teacherCell.textContent = eval.teacherName;
+                
+                // Overall Score
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = eval.overallScore;
+                scoreCell.style.fontWeight = 'bold';
+                
+                // Trend
+                const trendCell = document.createElement('td');
+                if (index > 0) {
+                    const prevScore = parseFloat(studentEvaluations[index - 1].overallScore);
+                    const currentScore = parseFloat(eval.overallScore);
+                    const diff = currentScore - prevScore;
+                    
+                    const trendSpan = document.createElement('span');
+                    trendSpan.className = 'trend-indicator';
+                    
+                    if (diff > 0.1) {
+                        trendSpan.className = 'trend-indicator trend-up';
+                        trendSpan.textContent = `+${diff.toFixed(1)}`;
+                    } else if (diff < -0.1) {
+                        trendSpan.className = 'trend-indicator trend-down';
+                        trendSpan.textContent = diff.toFixed(1);
+                    } else {
+                        trendSpan.className = 'trend-indicator trend-neutral';
+                        trendSpan.textContent = '0.0';
+                    }
+                    
+                    trendCell.appendChild(trendSpan);
+                } else {
+                    trendCell.textContent = '-';
+                }
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const viewBtn = document.createElement('button');
+                viewBtn.textContent = 'View';
+                viewBtn.className = 'btn btn-primary';
+                viewBtn.style.padding = '5px 10px';
+                viewBtn.addEventListener('click', function() {
+                    viewEvaluationDetails(eval);
+                });
+                actionsCell.appendChild(viewBtn);
+                
+                row.appendChild(dateCell);
+                row.appendChild(subjectCell);
+                row.appendChild(teacherCell);
+                row.appendChild(scoreCell);
+                row.appendChild(trendCell);
+                row.appendChild(actionsCell);
+                
+                historyTable.appendChild(row);
+            });
+            
+            // Create performance chart
+            updateStudentPerformanceChart(studentEvaluations);
+        }
+        
+        function viewEvaluationDetails(evaluation) {
+            // Switch to evaluation tab and populate form with this evaluation
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab[data-tab="evaluation"]').classList.add('active');
+            document.getElementById('evaluation-tab').classList.add('active');
+            
+            // Populate form
+            document.getElementById('studentName').value = evaluation.studentName;
+            document.getElementById('studentId').value = evaluation.studentId;
+            document.getElementById('gradeClass').value = evaluation.gradeClass;
+            document.getElementById('evaluationDate').value = evaluation.evaluationDate;
+            document.getElementById('teacherName').value = evaluation.teacherName;
+            document.getElementById('subject').value = evaluation.subject;
+            
+            // Set ratings
+            const categories = ['academic', 'participation', 'homework', 'behavior', 'collaboration'];
+            categories.forEach(category => {
+                const radio = document.querySelector(`input[name="${category}"][value="${evaluation[category]}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    radio.closest('.rating-option').classList.add('selected');
+                }
+            });
+            
+            // Set text areas
+            document.getElementById('strengths').value = evaluation.strengths || '';
+            document.getElementById('improvements').value = evaluation.improvements || '';
+            document.getElementById('comments').value = evaluation.comments || '';
+            
+            // Calculate and show results
+            calculateResults();
+            analyzeSentiment();
+            generateAIRecommendations();
+            document.getElementById('resultContainer').style.display = 'block';
+            window.scrollTo({ top: document.getElementById('resultContainer').offsetTop, behavior: 'smooth' });
+        }
+        
+        function updateStudentPerformanceChart(evaluations) {
+            const chartContainer = document.getElementById('performanceChart');
+            chartContainer.innerHTML = '';
+            
+            // Get unique dates
+            const dates = evaluations.map(e => e.evaluationDate);
+            const scores = evaluations.map(e => parseFloat(e.overallScore));
+            
+            // Find min and max scores for scaling
+            const maxScore = Math.max(...scores, 5);
+            
+            // Create chart bars
+            dates.forEach((date, index) => {
+                const score = scores[index];
+                const percentage = (score / maxScore) * 100;
+                
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${percentage}%`;
+                
+                const value = document.createElement('div');
+                value.className = 'chart-bar-value';
+                value.textContent = score.toFixed(1);
+                
+                const label = document.createElement('div');
+                label.className = 'chart-bar-label';
+                label.textContent = date;
+                
+                bar.appendChild(value);
+                bar.appendChild(label);
+                chartContainer.appendChild(bar);
+            });
+        }
+        
+        // ANALYTICS FUNCTIONS
+        function getEvaluations() {
+            const evaluationsJson = localStorage.getItem(STORAGE_KEY);
+            if (!evaluationsJson) {
+                // Create sample evaluations if none exist
+                const sampleEvaluations = createSampleEvaluations();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleEvaluations));
+                return sampleEvaluations;
+            }
+            
+            return JSON.parse(evaluationsJson);
+        }
+        
+        function createSampleEvaluations() {
+            const sampleStudents = getStudentRecords();
+            const subjects = ["Mathematics", "Science", "English", "Filipino", "Araling Panlipunan", "MAPEH"];
+            const teachers = ["Mr. Rodriguez", "Ms. Santos", "Mrs. Garcia", "Mr. Tan", "Ms. Lee"];
+            
+            const evaluations = [];
+            const now = new Date();
+            
+            // Create sample evaluations for each student
+            sampleStudents.forEach((student, index) => {
+                const evalCount = 2 + Math.floor(Math.random() * 3); // 2-4 evaluations per student
+                
+                for (let i = 0; i < evalCount; i++) {
+                    const evalDate = new Date(now);
+                    evalDate.setMonth(now.getMonth() - (evalCount - i - 1)); // Spread evaluations over past months
+                    
+                    evaluations.push({
+                        studentName: student.name,
+                        studentId: student.id,
+                        gradeClass: student.grade,
+                        evaluationDate: evalDate.toISOString().split('T')[0],
+                        teacherName: teachers[Math.floor(Math.random() * teachers.length)],
+                        subject: subjects[Math.floor(Math.random() * subjects.length)],
+                        academic: 3 + Math.floor(Math.random() * 3), // 3-5
+                        participation: 3 + Math.floor(Math.random() * 3),
+                        homework: 3 + Math.floor(Math.random() * 3),
+                        behavior: 3 + Math.floor(Math.random() * 3),
+                        collaboration: 3 + Math.floor(Math.random() * 3),
+                        strengths: "Demonstrates good understanding of core concepts. Shows improvement over time.",
+                        improvements: "Could benefit from additional practice with advanced problems.",
+                        comments: "Student is making steady progress. Continue with current support strategies.",
+                        timestamp: evalDate.toISOString(),
+                        overallScore: ((3 + Math.random() * 2)).toFixed(1) // 3.0-5.0
+                    });
+                }
+            });
+            
+            return evaluations;
+        }
+        
+        function calculateStudentAverages(evaluations) {
+            const studentMap = {};
+            
+            evaluations.forEach(eval => {
+                if (!studentMap[eval.studentId]) {
+                    studentMap[eval.studentId] = {
+                        name: eval.studentName,
+                        totalScore: 0,
+                        count: 0
+                    };
+                }
+                
+                studentMap[eval.studentId].totalScore += parseFloat(eval.overallScore);
+                studentMap[eval.studentId].count++;
+            });
+            
+            // Calculate averages
+            for (const studentId in studentMap) {
+                studentMap[studentId].avgScore = studentMap[studentId].totalScore / studentMap[studentId].count;
+            }
+            
+            return studentMap;
+        }
+        
+        function findMostImprovedStudent(evaluations) {
+            // Group evaluations by student and sort by date
+            const studentEvaluations = {};
+            
+            evaluations.forEach(eval => {
+                if (!studentEvaluations[eval.studentId]) {
+                    studentEvaluations[eval.studentId] = [];
+                }
+                studentEvaluations[eval.studentId].push({
+                    ...eval,
+                    date: new Date(eval.evaluationDate)
+                });
+            });
+            
+            let mostImproved = null;
+            let maxImprovement = 0;
+            
+            for (const studentId in studentEvaluations) {
+                const evals = studentEvaluations[studentId];
+                if (evals.length < 2) continue;
+                
+                // Sort by date
+                evals.sort((a, b) => a.date - b.date);
+                
+                // Calculate improvement from first to last evaluation
+                const firstScore = parseFloat(evals[0].overallScore);
+                const lastScore = parseFloat(evals[evals.length - 1].overallScore);
+                const improvement = lastScore - firstScore;
+                
+                if (improvement > maxImprovement) {
+                    maxImprovement = improvement;
+                    mostImproved = {
+                        name: evals[0].studentName,
+                        improvement: improvement,
+                        firstScore: firstScore,
+                        lastScore: lastScore
+                    };
+                }
+            }
+            
+            return mostImproved;
+        }
+        
+        function updatePerformanceTrendChart(evaluations) {
+            const ctx = document.getElementById('performanceTrendChart');
+            
+            // Destroy existing chart if it exists
+            if (window.performanceTrendChartInstance) {
+                window.performanceTrendChartInstance.destroy();
+            }
+            
+            if (evaluations.length === 0) {
+                ctx.style.display = 'none';
+                return;
+            }
+            
+            ctx.style.display = 'block';
+            
+            // Group evaluations by month
+            const monthlyData = {};
+            evaluations.forEach(eval => {
+                const date = new Date(eval.evaluationDate);
+                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (!monthlyData[monthYear]) {
+                    monthlyData[monthYear] = {
+                        total: 0,
+                        count: 0
+                    };
+                }
+                
+                monthlyData[monthYear].total += parseFloat(eval.overallScore);
+                monthlyData[monthYear].count++;
+            });
+            
+            // Convert to arrays for chart
+            const labels = Object.keys(monthlyData).sort();
+            const data = labels.map(label => 
+                (monthlyData[label].total / monthlyData[label].count).toFixed(1)
+            );
+            
+            window.performanceTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Score',
+                        data: data,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Performance Trend Over Time'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: {
+                                display: true,
+                                text: 'Average Score'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateCategoryBreakdownChart(evaluations) {
+            const ctx = document.getElementById('categoryBreakdownChart');
+            
+            // Destroy existing chart if it exists
+            if (window.categoryBreakdownChartInstance) {
+                window.categoryBreakdownChartInstance.destroy();
+            }
+            
+            if (evaluations.length === 0) {
+                ctx.style.display = 'none';
+                return;
+            }
+            
+            ctx.style.display = 'block';
+            
+            // Calculate average for each category
+            const categories = ['academic', 'participation', 'homework', 'behavior', 'collaboration'];
+            const categoryLabels = ['Academic', 'Participation', 'Homework', 'Behavior', 'Collaboration'];
+            const categoryAverages = categories.map(category => {
+                const total = evaluations.reduce((sum, eval) => sum + eval[category], 0);
+                return (total / evaluations.length).toFixed(1);
+            });
+            
+            window.categoryBreakdownChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: 'Average Rating',
+                        data: categoryAverages,
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(155, 89, 182, 0.7)',
+                            'rgba(241, 196, 15, 0.7)',
+                            'rgba(230, 126, 34, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(52, 152, 219)',
+                            'rgb(46, 204, 113)',
+                            'rgb(155, 89, 182)',
+                            'rgb(241, 196, 15)',
+                            'rgb(230, 126, 34)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Category Performance Breakdown'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: {
+                                display: true,
+                                text: 'Average Rating'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateAnalyticsStudentRecords(evaluations) {
+            const container = document.getElementById('studentRecords');
+            container.innerHTML = '';
+            
+            // Get top 6 students by average score
+            const studentAverages = calculateStudentAverages(evaluations);
+            const topStudents = Object.values(studentAverages)
+                .sort((a, b) => b.avgScore - a.avgScore)
+                .slice(0, 6);
+            
+            topStudents.forEach(student => {
+                const recordCard = document.createElement('div');
+                recordCard.className = 'record-card';
+                
+                // Determine badge based on score
+                let badgeClass = 'badge-warning';
+                let status = 'Average';
+                
+                if (student.avgScore >= 4.5) {
+                    badgeClass = 'badge-success';
+                    status = 'Excellent';
+                } else if (student.avgScore >= 3.5) {
+                    badgeClass = 'badge-info';
+                    status = 'Good';
+                } else if (student.avgScore <= 2.5) {
+                    badgeClass = 'badge-danger';
+                    status = 'Needs Improvement';
+                }
+                
+                recordCard.innerHTML = `
+                    <div class="record-header">
+                        <div class="record-name">${student.name}</div>
+                        <div class="record-score">${student.avgScore.toFixed(1)}</div>
+                    </div>
+                    <div class="record-details">
+                        <div class="record-detail">
+                            <span class="record-label">Evaluations:</span>
+                            <span class="record-value">${student.count}</span>
+                        </div>
+                        <div class="record-detail">
+                            <span class="record-label">Status:</span>
+                            <span class="record-value"><span class="badge ${badgeClass}">${status}</span></span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(recordCard);
+            });
+        }
+        
+        function updateExcellenceAndImprovement(evaluations) {
+            const studentAverages = calculateStudentAverages(evaluations);
+            
+            // Excellence students (avgScore >= 4.5)
+            const excellenceStudents = Object.values(studentAverages)
+                .filter(s => s.avgScore >= 4.5)
+                .sort((a, b) => b.avgScore - a.avgScore);
+            
+            // Improvement students (showing positive trend)
+            const improvementStudents = Object.values(studentAverages)
+                .filter(s => s.count >= 2) // Need at least 2 evaluations to show improvement
+                .slice(0, 5); // Take top 5 by score for demonstration
+            
+            // Update counts
+            document.getElementById('excellenceCount').textContent = `${excellenceStudents.length} Students`;
+            document.getElementById('improvementCount').textContent = `${improvementStudents.length} Students`;
+            
+            // Update excellence section
+            const excellenceContainer = document.getElementById('excellenceStudents');
+            excellenceContainer.innerHTML = '';
+            
+            if (excellenceStudents.length === 0) {
+                excellenceContainer.innerHTML = '<p>No students with excellence rating yet.</p>';
+            } else {
+                excellenceStudents.forEach(student => {
+                    const studentDiv = document.createElement('div');
+                    studentDiv.style.padding = '10px';
+                    studentDiv.style.borderBottom = '1px solid #eee';
+                    studentDiv.innerHTML = `
+                        <strong>${student.name}</strong> - Average Score: ${student.avgScore.toFixed(1)}
+                        <span class="badge badge-success" style="float: right;">Excellent</span>
+                    `;
+                    excellenceContainer.appendChild(studentDiv);
+                });
+            }
+            
+            // Update improvement section
+            const improvementContainer = document.getElementById('improvementStudents');
+            improvementContainer.innerHTML = '';
+            
+            if (improvementStudents.length === 0) {
+                improvementContainer.innerHTML = '<p>No students with improvement data yet.</p>';
+            } else {
+                improvementStudents.forEach(student => {
+                    const studentDiv = document.createElement('div');
+                    studentDiv.style.padding = '10px';
+                    studentDiv.style.borderBottom = '1px solid #eee';
+                    studentDiv.innerHTML = `
+                        <strong>${student.name}</strong> - ${student.count} evaluations, Average: ${student.avgScore.toFixed(1)}
+                        <span class="badge badge-warning" style="float: right;">Tracking</span>
+                    `;
+                    improvementContainer.appendChild(studentDiv);
+                });
+            }
+        }
+        
+        function updateRecentEvaluationsTable(evaluations) {
+            const tableBody = document.getElementById('recentEvaluations');
+            tableBody.innerHTML = '';
+            
+            // Sort evaluations by date (most recent first)
+            const recentEvals = [...evaluations]
+                .sort((a, b) => new Date(b.evaluationDate) - new Date(a.evaluationDate))
+                .slice(0, 10); // Show only 10 most recent
+            
+            recentEvals.forEach(eval => {
+                const row = document.createElement('tr');
+                
+                // Date
+                const dateCell = document.createElement('td');
+                dateCell.textContent = eval.evaluationDate;
+                
+                // Student
+                const studentCell = document.createElement('td');
+                studentCell.textContent = eval.studentName;
+                
+                // Grade
+                const gradeCell = document.createElement('td');
+                gradeCell.textContent = eval.gradeClass;
+                
+                // Subject
+                const subjectCell = document.createElement('td');
+                subjectCell.textContent = eval.subject;
+                
+                // Teacher
+                const teacherCell = document.createElement('td');
+                teacherCell.textContent = eval.teacherName;
+                
+                // Score
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = eval.overallScore;
+                scoreCell.style.fontWeight = 'bold';
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const viewBtn = document.createElement('button');
+                viewBtn.textContent = 'View';
+                viewBtn.className = 'btn btn-primary';
+                viewBtn.style.padding = '5px 10px';
+                viewBtn.addEventListener('click', function() {
+                    viewEvaluationDetails(eval);
+                });
+                actionsCell.appendChild(viewBtn);
+                
+                row.appendChild(dateCell);
+                row.appendChild(studentCell);
+                row.appendChild(gradeCell);
+                row.appendChild(subjectCell);
+                row.appendChild(teacherCell);
+                row.appendChild(scoreCell);
+                row.appendChild(actionsCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            if (recentEvals.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 7;
+                cell.textContent = 'No evaluations found';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '20px';
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+            }
+        }
+        
+        function clearChartsAndTables() {
+            // Clear charts
+            const charts = ['performanceTrendChart', 'categoryBreakdownChart'];
+            charts.forEach(chartId => {
+                const ctx = document.getElementById(chartId);
+                if (ctx) {
+                    if (window[chartId + 'Instance']) {
+                        window[chartId + 'Instance'].destroy();
+                    }
+                    ctx.style.display = 'none';
+                }
+            });
+            
+            // Clear tables and sections
+            const containers = [
+                'studentRecords',
+                'excellenceStudents',
+                'improvementStudents',
+                'recentEvaluations'
+            ];
+            
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = '<p>No data available</p>';
+                }
+            });
+        }
+        
+        function saveAnalyticsData() {
+            const evaluations = getEvaluations();
+            const analyticsData = {
+                timestamp: new Date().toISOString(),
+                totalEvaluations: evaluations.length,
+                averageScore: evaluations.length > 0 ? 
+                    (evaluations.reduce((sum, eval) => sum + parseFloat(eval.overallScore), 0) / evaluations.length).toFixed(1) : 0,
+                studentCount: getStudentRecords().length,
+                data: evaluations
+            };
+            
+            const dataStr = JSON.stringify(analyticsData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            // Create download link
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `analytics-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Analytics data saved successfully!');
+        }
+        
+        function exportToWord() {
+            const evaluation = saveEvaluation(); // Ensure latest evaluation is saved
+            
+            // Create a simple HTML document for the report
+            const reportContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Student Evaluation Report - ${evaluation.studentName}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; }
+                        h1 { color: #3498db; }
+                        .header { margin-bottom: 30px; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .score { font-size: 24px; font-weight: bold; color: #3498db; }
+                        .section { margin: 30px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Student Performance Evaluation Report</h1>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>Student Information</h2>
+                        <table>
+                            <tr><th>Student Name:</th><td>${evaluation.studentName}</td></tr>
+                            <tr><th>Student ID:</th><td>${evaluation.studentId}</td></tr>
+                            <tr><th>Grade/Class:</th><td>${evaluation.gradeClass}</td></tr>
+                            <tr><th>Evaluation Date:</th><td>${evaluation.evaluationDate}</td></tr>
+                            <tr><th>Teacher:</th><td>${evaluation.teacherName}</td></tr>
+                            <tr><th>Subject:</th><td>${evaluation.subject}</td></tr>
+                            <tr><th>Overall Score:</th><td class="score">${evaluation.overallScore}/5.0</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>Performance Ratings</h2>
+                        <table>
+                            <tr>
+                                <th>Category</th>
+                                <th>Rating</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>Academic Performance</td>
+                                <td>${evaluation.academic}/5</td>
+                                <td>${getRatingDescription(evaluation.academic)}</td>
+                            </tr>
+                            <tr>
+                                <td>Class Participation</td>
+                                <td>${evaluation.participation}/5</td>
+                                <td>${getRatingDescription(evaluation.participation)}</td>
+                            </tr>
+                            <tr>
+                                <td>Homework Completion</td>
+                                <td>${evaluation.homework}/5</td>
+                                <td>${getRatingDescription(evaluation.homework)}</td>
+                            </tr>
+                            <tr>
+                                <td>Behavior</td>
+                                <td>${evaluation.behavior}/5</td>
+                                <td>${getRatingDescription(evaluation.behavior)}</td>
+                            </tr>
+                            <tr>
+                                <td>Collaboration Skills</td>
+                                <td>${evaluation.collaboration}/5</td>
+                                <td>${getRatingDescription(evaluation.collaboration)}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>Feedback</h2>
+                        <h3>Strengths:</h3>
+                        <p>${evaluation.strengths || 'Not provided'}</p>
+                        
+                        <h3>Areas for Improvement:</h3>
+                        <p>${evaluation.improvements || 'Not provided'}</p>
+                        
+                        <h3>Additional Comments:</h3>
+                        <p>${evaluation.comments || 'Not provided'}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <p><strong>Report generated by:</strong> Student Performance Rating System with AI</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Create download link for HTML file
+            const blob = new Blob([reportContent], {type: 'application/msword'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Evaluation_${evaluation.studentName}_${evaluation.evaluationDate}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Report exported successfully!');
+        }
+    </script>
+</body>
+</html>

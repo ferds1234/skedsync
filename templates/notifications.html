@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications - SkedSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #60a5fa;
+            --bg: #ffffff;
+            --bg-dark: #f8fafc;
+            --bg-light: #ffffff;
+            --glass: rgba(255,255,255,0.85);
+            --glass-blur: blur(12px);
+            --card: #ffffff;
+            --card-alt: #f8fafc;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 12px 0 rgba(0,0,0,0.05);
+        }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #ffffff 70%, #f1f5f9 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 2px 0 24px rgba(0,0,0,0.08);
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            border-right: 1.5px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 2.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            text-shadow: none;
+        }
+        .sidebar .sidebar-icons {
+            display: flex;
+            gap: 0.5em;
+        }
+        .sidebar nav {
+            width: 100%;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1.12rem;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: none;
+        }
+        .sidebar .nav-divider {
+            width: 90%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.1rem auto 0.5rem auto;
+            border: none;
+        }
+        .sidebar nav a.active,
+        .sidebar nav a:hover {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            box-shadow: 0 2px 12px #2563eb33;
+        }
+        
+        .sidebar-divider {
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 1.7rem 0 1.1rem 0;
+            border: none;
+        }
+
+        .sidebar-profile {
+            width: 100%;
+            text-align: left;
+            color: var(--text-muted);
+            font-size: 1.01rem;
+            font-family: 'Roboto', Arial, sans-serif;
+            margin-bottom: 1.2rem;
+            padding-left: 0.1rem;
+            padding-bottom: 0.2rem;
+            letter-spacing: 0.01em;
+        }
+        .sidebar .logout-btn {
+            margin-top: 0;
+            background: none;
+            color: var(--text);
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1.09rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 0.7rem;
+            box-shadow: none;
+            text-align: left;
+        }
+        .sidebar .logout-btn:hover {
+            background: #e2e8f0;
+            color: #60a5fa;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2.7rem 2.7rem 2rem 2.7rem;
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 2.5px solid #e2e8f0;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.05), 0 1.5px 12px rgba(0,0,0,0.03);
+            backdrop-filter: blur(18px) saturate(1.2);
+            background-clip: padding-box;
+            position: relative;
+            z-index: 1;
+        }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(90deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 1.2rem 2.1rem 1.2rem 2.1rem;
+        }
+        .dashboard-header h1 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            background: linear-gradient(90deg, #1e293b 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+            margin: 0;
+            padding: 0.18em 0.2em;
+            border-radius: 12px;
+            border: 2.5px solid rgba(96,165,250,0.2);
+            box-shadow: 0 0 24px rgba(96,165,250,0.1);
+            display: inline-block;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 2px solid #e2e8f0;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+            padding-right: 2rem;
+        }
+
+        .popup-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .popup-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-meta-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+        }
+
+        .popup-meta-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .popup-body {
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .popup-section {
+            margin-bottom: 1rem;
+        }
+
+        .popup-section-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-category {
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: var(--shadow);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: #ffffff;
+            margin-bottom: 0.8rem;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .notification-item.unseen {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 3px solid #3b82f6;
+        }
+
+
+
+        .notification-content {
+            color: var(--text);
+        }
+
+        .notification-content small {
+            color: var(--text-muted);
+        }
+
+        .notification-actions-menu {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification-action {
+            padding: 0.4rem;
+            border-radius: 8px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .notification-action:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .badge.unseen {
+            background: #3b82f6;
+            color: white;
+        }
+        .hex-bg {
+            position: fixed;
+            z-index: -1;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.3;
+        }
+        .hex-shape {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            filter: blur(1px);
+        }
+        .hex1 { left: 15vw; top: 10vh; width: 180px; }
+        .hex2 { right: 20vw; top: 25vh; width: 150px; }
+        .hex3 { left: 25vw; bottom: 20vh; width: 120px; }
+        .hex4 { right: 25vw; bottom: 15vh; width: 200px; }
+        .hex5 { left: 45vw; top: 40vh; width: 100px; }
+        .hex6 { left: 65vw; top: 60vh; width: 130px; }
+        .hex7 { left: 75vw; top: 15vh; width: 90px; }
+        .hex8 { left: 10vw; bottom: 30vh; width: 80px; }
+        .hex9 { right: 15vw; bottom: 35vh; width: 110px; }
+        .hex10 { left: 35vw; top: 70vh; width: 160px; }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #3b82f6;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .notification-item[data-page] {
+            display: none;
+        }
+
+        .notification-item[data-page="1"] {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="hex-bg">
+        <svg class="hex-shape hex1" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#60a5fa"/>
+        </svg>
+        <svg class="hex-shape hex2" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#38bdf8"/>
+        </svg>
+        <svg class="hex-shape hex3" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#64748b"/>
+        </svg>
+        <svg class="hex-shape hex4" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#0ea5e9"/>
+        </svg>
+        <svg class="hex-shape hex5" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#3b82f6"/>
+        </svg>
+        <svg class="hex-shape hex6" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#1e293b"/>
+        </svg>
+        <svg class="hex-shape hex7" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#fbbf24"/>
+        </svg>
+        <svg class="hex-shape hex8" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#f472b6"/>
+        </svg>
+        <svg class="hex-shape hex9" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#a78bfa"/>
+        </svg>
+        <svg class="hex-shape hex10" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#34d399"/>
+        </svg>
+    </div>
+    <aside class="sidebar">
+        <h2>
+            <span class="sidebar-icons">
+                <!-- Shield Icon (Security/Auth) from login page -->
+
+                <!-- Sync/Refresh Icon from login page -->
+                <svg viewBox="0 0 48 48" fill="none" width="1.5em" height="1.5em">
+                    <defs>
+                        <linearGradient id="sync-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#sync-grad)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            SkedSync
+        </h2>
+        <nav>
+            <a href="/dashboard">
+                Dashboard
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/schedule">
+                My Schedule
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/notifications" class="active">
+                Notifications
+            </a>
+
+            <div class="nav-divider"></div>
+            <a href="/flashcards">
+                Flashcards
+            </a>
+            <div class="nav-divider"></div>
+        </nav>
+        <div style="flex:1"></div>
+        <div style="width:100%;padding-bottom:1.2rem;">
+            <hr class="sidebar-divider" style="margin:0 0 1.1rem 0;">
+            <div class="sidebar-profile" style="
+                margin-bottom:0.5rem;
+                padding: 0;
+            ">
+                <a href="#" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.7em;
+                    color: var(--text);
+                    text-decoration: none;
+                    padding: 0.85rem 1.1rem;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    font-size: 1.12rem;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    margin-bottom: 0.3rem;
+                    color: white;
+                " tabindex="-1">
+                    <!-- User Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" width="1.2em" height="1.2em"><circle cx="12" cy="8" r="4" fill="#60a5fa"/><path d="M4 20v-1a8 8 0 0 1 16 0v1" fill="#60a5fa" fill-opacity="0.7"/></svg>
+                    {{ session.get('user', 'User') }}
+                </a>
+            </div>
+            <form action="/logout" method="get" style="width:100%;">
+                <button class="logout-btn" type="submit">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="dashboard-header">
+            <h1>
+                <span class="header-icons" style="font-size:1.2em;vertical-align:middle;">
+                    <i class="fas fa-bell"></i>
+                </span>
+                Notifications
+            </h1>
+        </div>
+
+
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="notification-category">
+                <div class="category-header">
+                    <span class="category-title">Room Announcements</span>
+                    <span class="badge unseen">{{ notifications|selectattr('type', 'equalto', 'room')|list|length }} new</span>
+                </div>
+                <div class="notification-items" id="roomNotifications">
+                    {% for notification in notifications if notification.type == 'room' %}
+                    <div class="notification-item unseen" data-page="{{(loop.index0 // 5) + 1}}" onclick="openPopup('{{ notification.title }}', '{{ notification.description or 'No additional details available.' }}', '{{ notification.subject or '' }}', '{{ notification.room or '' }}', '{{ notification.date.strftime('%B %d, %Y') if notification.date else '' }}', '{{ notification.time or '' }}')">
+                        <div class="notification-content">
+                            <div>{{ notification.title }}</div>
+                            <small>{{ notification.created_at.strftime('%b %d, %Y') if notification.created_at else 'Recently' }}</small>
+                        </div>
+                        <div class="notification-actions-menu">
+                            <button class="notification-action" title="Mark as read" onclick="event.stopPropagation(); markAsRead(this)">
+                                <i class="fas fa-check"></i>
+                            </button>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <button class="pagination-btn prev" onclick="changePage('room', -1)">Previous</button>
+                    <span class="page-info" id="roomPageInfo">Page 1</span>
+                    <button class="pagination-btn next" onclick="changePage('room', 1)">Next</button>
+                </div>
+            </div>
+
+            <div class="notification-category">
+                <div class="category-header">
+                    <span class="category-title">Exam Announcements</span>
+                    <span class="badge unseen">{{ notifications|selectattr('type', 'equalto', 'exam')|list|length }} new</span>
+                </div>
+                <div class="notification-items" id="examNotifications">
+                    {% for notification in notifications if notification.type == 'exam' %}
+                    <div class="notification-item unseen" data-page="{{(loop.index0 // 5) + 1}}" onclick="openPopup('{{ notification.title }}', '{{ notification.description or 'No additional details available.' }}', '{{ notification.subject or '' }}', '{{ notification.room or '' }}', '{{ notification.date.strftime('%B %d, %Y') if notification.date else '' }}', '{{ notification.time or '' }}')">
+                        <div class="notification-content">
+                            <div>{{ notification.title }}</div>
+                            <small>{{ notification.created_at.strftime('%b %d, %Y') if notification.created_at else 'Recently' }}</small>
+                        </div>
+                        <div class="notification-actions-menu">
+                            <button class="notification-action" title="Mark as read" onclick="event.stopPropagation(); markAsRead(this)">
+                                <i class="fas fa-check"></i>
+                            </button>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <button class="pagination-btn prev" onclick="changePage('exam', -1)">Previous</button>
+                    <span class="page-info" id="examPageInfo">Page 1</span>
+                    <button class="pagination-btn next" onclick="changePage('exam', 1)">Next</button>
+                </div>
+            </div>
+
+            <div class="notification-category">
+                <div class="category-header">
+                    <span class="category-title">Quiz Announcements</span>
+                    <span class="badge unseen">{{ notifications|selectattr('type', 'equalto', 'quiz')|list|length }} new</span>
+                </div>
+                <div class="notification-items" id="quizNotifications">
+                    {% for notification in notifications if notification.type == 'quiz' %}
+                    <div class="notification-item unseen" data-page="{{(loop.index0 // 5) + 1}}" onclick="openPopup('{{ notification.title }}', '{{ notification.description or 'No additional details available.' }}', '{{ notification.subject or '' }}', '{{ notification.room or '' }}', '{{ notification.date.strftime('%B %d, %Y') if notification.date else '' }}', '{{ notification.time or '' }}')">
+                        <div class="notification-content">
+                            <div>{{ notification.title }}</div>
+                            <small>{{ notification.created_at.strftime('%b %d, %Y') if notification.created_at else 'Recently' }}</small>
+                        </div>
+                        <div class="notification-actions-menu">
+                            <button class="notification-action" title="Mark as read" onclick="event.stopPropagation(); markAsRead(this)">
+                                <i class="fas fa-check"></i>
+                            </button>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="pagination">
+                    <button class="pagination-btn prev" onclick="changePage('quiz', -1)">Previous</button>
+                    <span class="page-info" id="quizPageInfo">Page 1</span>
+                    <button class="pagination-btn next" onclick="changePage('quiz', 1)">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popup -->
+        <div id="notificationPopup" class="popup">
+            <span class="close">&times;</span>
+            <h2 class="popup-title" id="popupTitle"></h2>
+            <div class="popup-meta" id="popupMeta"></div>
+            <div class="popup-body" id="popupBody"></div>
+        </div>
+    </main>
+    <script src="https://kit.fontawesome.com/8b5e2e5b8c.js" crossorigin="anonymous"></script>
+    <script>
+        // Move these variables outside any function to make them globally accessible
+        const currentPage = {
+            room: 1,
+            exam: 1,
+            quiz: 1
+        };
+        const itemsPerPage = 5;
+
+        function changePage(type, delta) {
+            const container = document.getElementById(`${type}Notifications`);
+            const items = container.getElementsByClassName('notification-item');
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+            
+            const newPage = currentPage[type] + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                // Hide all items
+                Array.from(items).forEach(item => {
+                    item.style.display = 'none';
+                });
+                
+                // Show items for the current page
+                const start = (newPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                Array.from(items).slice(start, end).forEach(item => {
+                    item.style.display = 'flex';
+                });
+                
+                currentPage[type] = newPage;
+                
+                // Update page info
+                const pageInfo = container.nextElementSibling.querySelector('.page-info');
+                pageInfo.textContent = `Page ${newPage} of ${totalPages}`;
+                
+                // Update button states
+                const prevBtn = container.nextElementSibling.querySelector('.prev');
+                const nextBtn = container.nextElementSibling.querySelector('.next');
+                
+                prevBtn.disabled = newPage === 1;
+                nextBtn.disabled = newPage === totalPages;
+                
+                prevBtn.style.opacity = newPage === 1 ? '0.5' : '1';
+                nextBtn.style.opacity = newPage === totalPages ? '0.5' : '1';
+            }
+        }
+
+        function openPopup(title, description, subject, room, date, time) {
+            document.getElementById('popupTitle').textContent = title;
+            
+            let metaHtml = '';
+            if (date) metaHtml += `<div class="popup-meta-item"><div class="popup-meta-label">Date</div><div class="popup-meta-value">${date}</div></div>`;
+            if (time) metaHtml += `<div class="popup-meta-item"><div class="popup-meta-label">Time</div><div class="popup-meta-value">${time}</div></div>`;
+            if (subject) metaHtml += `<div class="popup-meta-item"><div class="popup-meta-label">Subject</div><div class="popup-meta-value">${subject}</div></div>`;
+            if (room) metaHtml += `<div class="popup-meta-item"><div class="popup-meta-label">Room</div><div class="popup-meta-value">${room}</div></div>`;
+            document.getElementById('popupMeta').innerHTML = metaHtml;
+            
+            document.getElementById('popupBody').innerHTML = `<div class="popup-section"><div class="popup-section-title">Description</div><div>${description}</div></div>`;
+            
+            document.getElementById('notificationPopup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('notificationPopup').style.display = 'none';
+        }
+
+        function markAsRead(button) {
+            const item = button.closest('.notification-item');
+            item.classList.remove('unseen');
+        }
+
+        // Initialize everything when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize pagination for each category
+            ['room', 'exam', 'quiz'].forEach(type => {
+                changePage(type, 0);
+            });
+
+            // Popup close functionality
+            const popup = document.getElementById('notificationPopup');
+            const closeBtn = document.querySelector('.close');
+
+            closeBtn.onclick = closePopup;
+            
+            window.onclick = function(event) {
+                if (event.target === popup) {
+                    closePopup();
+                }
+            };
+        });
+
+
+    </script>
+</body>
+</html>

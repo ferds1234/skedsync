@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - SkedSync</title>
+    <meta name="viewport" content="width=width=device-width, initial-scale=1.0">
+    <!-- Google Fonts: Montserrat for headings, Roboto for body -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .hex-bg {
+            position: fixed;
+            z-index: 0;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .hex-shape {
+            position: absolute;
+            opacity: 0.13;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .hex1 { left: 7vw; top: 8vh; width: 120px; }
+        .hex2 { right: 10vw; top: 18vh; width: 90px; }
+        .hex3 { left: 18vw; bottom: 12vh; width: 80px; }
+        .hex4 { right: 14vw; bottom: 8vh; width: 140px; }
+        .hex5 { left: 50vw; top: 50vh; width: 60px; }
+        .hex6 { left: 70vw; top: 70vh; width: 70px; }
+        .hex7 { left: 80vw; top: 10vh; width: 60px; }
+        .hex8 { left: 5vw; bottom: 20vh; width: 50px; }
+        .hex9 { right: 5vw; bottom: 25vh; width: 50px; }
+        .hex10 { left: 40vw; top: 80vh; width: 80px; }
+        .center-wrapper {
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 0;
+            margin-bottom: 80px; /* Add space for footer */
+            position: relative;
+            z-index: 1;
+        }
+        .register-container {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #ffffff 60%, #f8fafc 100%);
+            padding: 2.7rem 2.2rem 2.2rem 2.2rem;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.08), 0 1.5px 12px 0 rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 390px;
+            text-align: center;
+            border: 1.5px solid #e2e8f0;
+            animation: fadein 1.2s cubic-bezier(.39,.575,.565,1) both;
+            overflow: hidden;
+        }
+        .register-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 60px;
+            background: linear-gradient(90deg, rgba(59,130,246,0.13) 0%, rgba(255,255,255,0.08) 100%);
+            pointer-events: none;
+        }
+        @keyframes fadein {
+            0% { opacity: 0; transform: translateY(30px) scale(0.98);}
+            100% { opacity: 1; transform: none;}
+        }
+        .icon-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            margin-bottom: 0.7rem;
+        }
+        .icon-row svg {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 2px 8px #1e293b55);
+            transition: transform 0.2s;
+        }
+        .icon-row svg:hover {
+            transform: scale(1.12) rotate(-3deg);
+        }
+        .register-container h1 {
+            margin-bottom: 0.3rem;
+            color: #1e293b;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            font-size: 2.1rem;
+            text-shadow: none;
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+        }
+        .register-container p {
+            color: #60a5fa;
+            font-size: 1.08rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .register-container input[type="text"],
+        .register-container input[type="email"],
+        .register-container input[type="password"] {
+            width: 100%;
+            padding: 0.9rem;
+            margin-bottom: 1.1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 1px 8px 0 rgba(0,0,0,0.03);
+            transition: border 0.2s, box-shadow 0.2s;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .register-container input:focus {
+            border: 1.5px solid #3b82f6;
+            outline: none;
+            box-shadow: 0 2px 12px 0 rgba(59,130,246,0.15);
+        }
+        .register-container input::placeholder {
+            font-size: 0.97rem;
+            color: #9ca3af;
+            opacity: 1;
+        }
+        .register-container select {
+            width: 100%;
+            padding: 0.9rem;
+            margin-bottom: 1.1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 1px 8px 0 rgba(0,0,0,0.03);
+            transition: border 0.2s, box-shadow 0.2s;
+            font-family: 'Roboto', Arial, sans-serif;
+            appearance: none;
+            outline: none;
+        }
+        .register-container select:focus {
+            border: 1.5px solid #3b82f6;
+            outline: none;
+            box-shadow: 0 2px 12px 0 rgba(59,130,246,0.15);
+        }
+        .register-container select:invalid {
+            font-size: 0.97rem;
+            color: #9ca3af;
+            opacity: 1;
+        }
+        .register-container select option,
+        .register-container select optgroup {
+            background: #ffffff;
+            color: #1e293b;
+        }
+        .register-container select optgroup {
+            font-weight: bold;
+            color: #60a5fa;
+        }
+        .register-container button {
+            width: 100%;
+            padding: 0.95rem;
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.13rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 16px 0 #3b82f655;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+            margin-top: 1.2rem;
+        }
+        .register-container button:hover {
+            background: linear-gradient(90deg, #1e40af 0%, #38bdf8 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 4px 24px 0 #60a5fa55;
+        }
+        .register-container .login-link {
+            display: block;
+            margin-top: 1.3rem;
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 1.03rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            transition: color 0.2s;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .register-container .login-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        .register-container .info-text {
+            margin-top: 1.7rem;
+            color: #64748b;
+            font-size: 1.01rem;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: rgba(59,130,246,0.05);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            box-shadow: 0 1px 8px 0 rgba(59,130,246,0.1);
+        }
+        footer {
+            width: 100vw;
+            text-align: center;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            color: #64748b;
+            font-family: 'Roboto',Arial,sans-serif;
+            font-size: 1.02rem;
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 -2px 24px 0 rgba(0,0,0,0.08);
+            z-index: 10;
+            border-top: 1.5px solid #e2e8f0;
+            letter-spacing: 0.03em;
+            min-height: 70px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+        }
+        footer > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2em;
+            padding: 1.1rem 0 0.7rem 0;
+            max-width: 100vw;
+            margin: auto;
+            flex-wrap: wrap;
+            min-height: 70px;
+            width: 100%;
+            text-align: center;
+        }
+        .footer-links {
+            display: flex;
+            flex-direction: row;
+            gap: 1.2em;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            height: 100%;
+        }
+        .footer-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.3em;
+            transition: color 0.2s;
+        }
+        .footer-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        .footer-icon {
+            width: 1.1em;
+            height: 1.1em;
+            vertical-align: middle;
+            fill: currentColor;
+        }
+        .footer-note {
+            margin: 0 0 0 1.2em;
+            color: #64748b;
+            font-size: 0.97em;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+            text-align: center;
+        }
+        @media (max-width: 700px) {
+            footer > div {
+                flex-direction: column;
+                gap: 0.5em;
+                padding-left: 0.5em;
+                padding-right: 0.5em;
+                min-height: 70px;
+                align-items: center;
+                justify-content: center;
+            }
+            .footer-links {
+                gap: 0.7em;
+                justify-content: center;
+            }
+            .footer-note {
+                margin: 0;
+                white-space: normal;
+                text-align: center;
+            }
+        }
+        @media (max-width: 500px) {
+            .register-container {
+                padding: 1.5rem 0.4rem 1.2rem 0.4rem;
+                max-width: 99vw;
+            }
+            footer > div {
+                max-width: 98vw;
+                padding-left: 0.5em;
+                padding-right: 0.5em;
+            }
+            .footer-links {
+                gap: 0.7em;
+            }
+            .form-fields > input,
+            .form-fields > select,
+            .form-fields > button {
+                width: 99.5% !important;
+            }
+        }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(30,41,59,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-backdrop.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #ffffff;
+            color: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            padding: 2.2rem 1.7rem 1.5rem 1.7rem;
+            max-width: 95vw;
+            width: 370px;
+            position: relative;
+            font-family: 'Roboto', Arial, sans-serif;
+            animation: fadein 0.25s;
+            border: 1.5px solid #e2e8f0;
+        }
+        .modal-content h2 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.35rem;
+            margin-top: 0;
+            margin-bottom: 0.7em;
+            color: #60a5fa;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .modal-content p {
+            font-size: 1.01rem;
+            color: #64748b;
+            margin-bottom: 0.7em;
+        }
+        .modal-close {
+            position: absolute;
+            top: 0.7em;
+            right: 1em;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.5em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #1e293b;
+        }
+        .form-fields {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+        }
+        .form-row {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            width: 99%;
+        }
+        .form-row > * {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+        .form-fields > .form-row,
+        .form-fields > select,
+        .form-fields > button {
+            width: 99% !important;
+            box-sizing: border-box;
+        }
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0.7rem;
+            }
+        }
+        .notif-popup {
+            position: fixed;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: #fff;
+            padding: 1rem 2.2rem;
+            border-radius: 12px;
+            font-size: 1.08rem;
+            font-family: 'Roboto', Arial, sans-serif;
+            box-shadow: 0 4px 24px #ef444433;
+            z-index: 2000;
+            animation: notiffade 0.3s, notifpopout 0.3s 2.7s forwards;
+        }
+        .notif-popup.success {
+            background: #22c55e;
+            box-shadow: 0 4px 24px #22c55e33;
+        }
+        @keyframes notiffade {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px);}
+            to   { opacity: 1; transform: translateX(-50%) translateY(0);}
+        }
+        @keyframes notifpopout {
+            to { opacity: 0; transform: translateX(-50%) translateY(-20px);}
+        }
+    </style>
+</head>
+<body>
+    <div class="hex-bg">
+        <svg class="hex-shape hex1" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#60a5fa"/>
+        </svg>
+        <svg class="hex-shape hex2" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#38bdf8"/>
+        </svg>
+        <svg class="hex-shape hex3" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#64748b"/>
+        </svg>
+        <svg class="hex-shape hex4" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#0ea5e9"/>
+        </svg>
+        <svg class="hex-shape hex5" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#3b82f6"/>
+        </svg>
+        <svg class="hex-shape hex6" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#1e293b"/>
+        </svg>
+        <svg class="hex-shape hex7" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#fbbf24"/>
+        </svg>
+        <svg class="hex-shape hex8" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#f472b6"/>
+        </svg>
+        <svg class="hex-shape hex9" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#a78bfa"/>
+        </svg>
+        <svg class="hex-shape hex10" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="#34d399"/>
+        </svg>
+    </div>
+    <div class="center-wrapper">
+        <div class="register-container">
+            <div class="icon-row">
+                <!-- Shield Icon (Security/Auth) -->
+                <svg viewBox="0 0 48 48" fill="none">
+                    <defs>
+                        <linearGradient id="shield-metal" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M24 6L8 14v10c0 11 8 17 16 18 8-1 16-7 16-18V14L24 6z"
+                          fill="url(#shield-metal)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M24 24v8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="24" cy="22" r="2" fill="#fff"/>
+                </svg>
+                <!-- Clock Icon (Scheduling/Time) -->
+                <svg viewBox="0 0 48 48" fill="none">
+                    <defs>
+                        <linearGradient id="clock-metal" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#clock-metal)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M24 14v10l7 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <!-- Sync/Refresh Icon -->
+                <svg viewBox="0 0 48 48" fill="none">
+                    <defs>
+                        <linearGradient id="sync-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#60a5fa"/>
+                            <stop offset="1" stop-color="#23272b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="18" fill="url(#sync-grad)" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M32 24a8 8 0 1 0-8 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M32 24v-6m0 6h-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1>Create Account</h1>
+            <p>Sign up to automate your class and exam schedules with smart notifications.</p>
+            <form method="post" action="/register">
+                <div class="form-fields">
+                    <div class="form-row">
+                        <input type="text" name="student_id" placeholder="Student ID" required>
+                        <input type="text" name="name" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="email" name="email" placeholder="Email" required>
+                        <select name="section" required>
+                            <option value="" disabled selected>Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <select name="department" required>
+                            <option value="" disabled selected>Select Department</option>
+                            <option value="BS in Information Technology">BS in Information Technology</option>
+                            <option value="BS in Computer Science">BS in Computer Science</option>
+                            <option value="BS in Information Systems">BS in Information Systems</option>
+                            <option value="BSED (major in English)">BSED (major in English)</option>
+                            <option value="BSED (major in Math)">BSED (major in Math)</option>
+                            <option value="BS in Criminology">BS in Criminology</option>
+                            <option value="BS in Business Administration">BS in Business Administration</option>
+                            <option value="BS in Civil Engineering">BS in Civil Engineering</option>
+                        </select>
+                        <select name="year_level" required>
+                            <option value="" disabled selected>Select Year Level</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                            <option value="5">5th Year</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="password" name="password" placeholder="Password" required>
+                        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                    </div>
+                    <button type="submit">Register</button>
+                </div>
+            </form>
+            <a class="login-link" href="/login">Already have an account? Login</a>
+            <div class="info-text">
+                By creating an account, you can sync your schedules across devices and receive smart reminders for your classes and exams.
+            </div>
+        </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="notif-popup{% if category == 'success' %} success{% endif %}" id="notif-popup">{{ message }}</div>
+          <script>
+              setTimeout(function() {
+                  var notif = document.getElementById('notif-popup');
+                  if (notif) notif.style.display = 'none';
+              }, 3000);
+          </script>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <!-- Modal -->
+    <div class="modal-backdrop" id="modal-backdrop">
+        <div class="modal-content" id="modal-content">
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    <footer>
+        <div>
+            <span>&copy; 2024 SkedSync</span>
+            <div class="footer-links">
+                <a class="footer-link" href="#" onclick="showModal('about');return false;" title="About">About</a>
+                <a class="footer-link" href="https://github.com/" target="_blank" title="GitHub">
+                    <svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.48 2.87 8.28 6.84 9.63.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.62-3.37-1.36-3.37-1.36-.45-1.18-1.1-1.5-1.1-1.5-.9-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05A9.38 9.38 0 0 1 12 6.84c.85.004 1.71.12 2.51.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z"/></svg>
+                    GitHub
+                </a>
+                <a class="footer-link" href="#" onclick="showModal('contact');return false;" title="Contact">
+                    <svg class="footer-icon" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 20v-9.99l7.29 6.71a1 1 0 0 0 1.42 0L20 10.01V20H4z"/></svg>
+                    Contact
+                </a>
+                <a class="footer-link" href="#" onclick="showModal('privacy');return false;" title="Privacy Policy">
+                    <svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7v5a7 7 0 0 0 5 6.71V22a1 1 0 0 0 2 0v-1.29A7 7 0 0 0 19 14V9a7 7 0 0 0-7-7zm0 2a5 5 0 0 1 5 5v5a5 5 0 0 1-10 0V9a5 5 0 0 1 5-5z"/></svg>
+                    Privacy Policy
+                </a>
+            </div>
+            <span class="footer-note">
+                Built for students and educators &mdash; Smart scheduling, everywhere.
+            </span>
+        </div>
+    </footer>
+    <script>
+        const modalContent = {
+            about: `
+                <h2>About SkedSync</h2>
+                <p><strong>SkedSync</strong> is a modern web and mobile-based platform that automates your class and exam schedules, providing smart notifications and seamless syncing across devices. Designed for students and educators, SkedSync helps you stay organized and never miss an important event.</p>
+                <ul style="color:#7dd3fc; text-align:left; margin:0.7em 0 0 0.5em; font-size:0.98em;">
+                    <li>Automatic class &amp; exam scheduling</li>
+                    <li>Smart reminders and notifications</li>
+                    <li>Cross-device sync</li>
+                    <li>Secure and private</li>
+                </ul>
+            `,
+            privacy: `
+                <h2>Privacy Policy</h2>
+                <p>Your privacy is important to us. SkedSync securely stores your schedule data and never shares your personal information with third parties. You can delete your account and data at any time.</p>
+                <ul style="color:#7dd3fc; text-align:left; margin:0.7em 0 0 0.5em; font-size:0.98em;">
+                    <li>Data encrypted in transit and at rest</li>
+                    <li>No ads or data selling</li>
+                    <li>Account deletion available</li>
+                </ul>
+            `,
+            contact: `
+                <h2>Contact Us</h2>
+                <p>Have questions, feedback, or need support? Reach out to our team:</p>
+                <ul style="color:#7dd3fc; text-align:left; margin:0.7em 0 0 0.5em; font-size:0.98em;">
+                    <li>Email: <a href="mailto:support@skedsync.com" style="color:#60a5fa;">support@skedsync.com</a></li>
+                    <li>GitHub: <a href="https://github.com/" target="_blank" style="color:#60a5fa;">SkedSync Project</a></li>
+                </ul>
+            `
+        };
+        function showModal(type) {
+            document.getElementById('modal-body').innerHTML = modalContent[type] || '';
+            document.getElementById('modal-backdrop').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.remove('active');
+        }
+        // Close modal on ESC or click outside
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape") closeModal();
+        });
+        document.getElementById('modal-backdrop').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
